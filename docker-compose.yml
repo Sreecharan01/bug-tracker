@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+  # MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: bugtracker_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: bug_tracker
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - bugtracker_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bugtracker_api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGO_URI: mongodb://admin:password123@mongodb:27017/bug_tracker?authSource=admin
+      JWT_SECRET: change_this_super_secret_jwt_key_in_production_min_32_chars
+      JWT_EXPIRE: 7d
+      JWT_REFRESH_SECRET: change_this_refresh_secret_in_production
+      JWT_REFRESH_EXPIRE: 30d
+      CLIENT_URL: http://localhost:3000
+      BCRYPT_ROUNDS: 12
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - bugtracker_net
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bugtracker_web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - bugtracker_net
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  bugtracker_net:
+    driver: bridge

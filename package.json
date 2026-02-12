@@ -1,0 +1,17 @@
+{
+  "name": "bug-tracker-mern",
+  "version": "1.0.0",
+  "description": "Production-Ready Bug Tracking System — MERN Stack",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
+    "start:backend": "npm start --prefix backend",
+    "start:frontend": "npm start --prefix frontend",
+    "seed": "node backend/src/seed.js",
+    "build": "npm run build --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
