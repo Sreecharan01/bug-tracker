@@ -57,7 +57,7 @@ bug-tracker/
 ### Option 1: Docker (Recommended)
 
 ```bash
-git clone <repo-url> bug-tracker
+git clone https://github.com/Sreecharan01/bug-tracker bug-tracker
 cd bug-tracker
 
 # Copy env and configure
@@ -220,3 +220,5 @@ JWT_REFRESH_EXPIRE=30d
 CLIENT_URL=http://localhost:3000
 BCRYPT_ROUNDS=12
 ```
+#   b u g - t r a c k e r  
+ 
