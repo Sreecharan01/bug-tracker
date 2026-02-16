@@ -51,6 +51,7 @@ export default function RegisterPage() {
               <option value="user">User</option>
               <option value="developer">Developer</option>
               <option value="tester">Tester</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
           <button type="submit" style={{ ...s.btn, opacity: loading ? 0.7 : 1 }} disabled={loading}>

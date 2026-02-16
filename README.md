@@ -78,7 +78,7 @@ docker exec bugtracker_api node src/seed.js
 
 ```bash
 # 1. Clone & install
-git clone <repo-url> bug-tracker && cd bug-tracker
+git clone https://github.com/Sreecharan01/bug-tracker bug-tracker && cd bug-tracker
 npm run install:all
 
 # 2. Configure backend
@@ -220,5 +220,6 @@ JWT_REFRESH_EXPIRE=30d
 CLIENT_URL=http://localhost:3000
 BCRYPT_ROUNDS=12
 ```
-#   b u g - t r a c k e r  
+#   b u g - t r a c k e r 
+ 
  

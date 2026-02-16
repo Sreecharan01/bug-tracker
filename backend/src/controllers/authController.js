@@ -10,8 +10,8 @@ const { sendSuccess, sendError } = require('../utils/response');
 const register = asyncHandler(async (req, res) => {
   const { name, email, password, role, department } = req.body;
 
-  // Prevent self-assigning admin role
-  const allowedRoles = ['user', 'developer', 'tester'];
+  // Allow admin role if selected
+  const allowedRoles = ['user', 'developer', 'tester', 'admin'];
   const userRole = allowedRoles.includes(role) ? role : 'user';
 
   const userExists = await User.findOne({ email });

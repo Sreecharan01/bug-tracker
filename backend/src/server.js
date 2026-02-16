@@ -1,4 +1,6 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -16,6 +18,7 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 connectDB();
 
 const app = express();
+app.set('trust proxy', 'loopback');
 
 // ==================== SECURITY MIDDLEWARE ====================
 app.use(helmet({
