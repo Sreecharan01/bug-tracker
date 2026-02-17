@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { userAPI } from '../services/api';
+import { THEME } from '../theme/designSystem';
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -134,28 +135,28 @@ const MField = ({ label, ...props }) => (
 );
 
 const s = {
-  page: { maxWidth: 1200, margin: '0 auto', fontFamily: 'Inter, system-ui, sans-serif' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  title: { margin: 0, fontSize: 26, fontWeight: 700, color: '#e2e8f0' },
-  sub: { margin: '4px 0 0', color: '#64748b', fontSize: 14 },
-  newBtn: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 },
-  modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modalCard: { background: '#1e293b', borderRadius: 16, padding: 32, width: 500, border: '1px solid #334155' },
-  modalTitle: { margin: '0 0 20px', fontSize: 18, fontWeight: 700, color: '#e2e8f0' },
-  alert: { background: '#450a0a', border: '1px solid #dc2626', color: '#fca5a5', padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 13 },
-  filters: { display: 'flex', gap: 12, marginBottom: 16 },
-  search: { background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '9px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', flex: 1 },
-  select: { background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '9px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', cursor: 'pointer' },
-  tableBox: { background: '#1e293b', borderRadius: 12, border: '1px solid #334155', overflow: 'auto' },
+  page: { maxWidth: 1200, margin: '0 auto', fontFamily: THEME.Typography.fontFamily },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: THEME.spacing.xl },
+  title: { margin: 0, fontSize: THEME.Typography.fontSize['2xl'], fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900] },
+  sub: { margin: `${THEME.spacing.sm}px 0 0`, color: THEME.colors.gray[500], fontSize: THEME.Typography.fontSize.base },
+  newBtn: { background: THEME.colors.blue[500], color: THEME.colors.white, border: 'none', padding: `${THEME.spacing.md}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontWeight: THEME.Typography.fontWeight.semibold },
+  modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modalCard: { background: THEME.colors.white, borderRadius: THEME.borderRadius.xl, padding: THEME.spacing['2xl'], width: 500, border: `1px solid ${THEME.colors.gray[200]}`, boxShadow: THEME.shadows.xl },
+  modalTitle: { margin: `0 0 ${THEME.spacing.lg}px`, fontSize: THEME.Typography.fontSize.lg, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900] },
+  alert: { background: '#FEE2E2', border: `1px solid ${THEME.colors.error}`, color: '#991B1B', padding: `${THEME.spacing.md}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, marginBottom: THEME.spacing.lg, fontSize: THEME.Typography.fontSize.sm },
+  filters: { display: 'flex', gap: THEME.spacing.md, marginBottom: THEME.spacing.lg },
+  search: { background: THEME.colors.white, border: `1px solid ${THEME.colors.gray[300]}`, borderRadius: THEME.borderRadius.md, padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.sm, outline: 'none', flex: 1 },
+  select: { background: THEME.colors.white, border: `1px solid ${THEME.colors.gray[300]}`, borderRadius: THEME.borderRadius.md, padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.sm, outline: 'none', cursor: 'pointer' },
+  tableBox: { background: THEME.colors.white, borderRadius: THEME.borderRadius.lg, border: `1px solid ${THEME.colors.gray[200]}`, overflow: 'auto', boxShadow: THEME.shadows.sm },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 800 },
-  th: { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px solid #334155' },
-  tr: { transition: 'background 0.1s' },
-  td: { padding: '12px 16px', fontSize: 13, color: '#94a3b8', borderBottom: '1px solid #1e293b' },
-  row: { display: 'flex', gap: 12 },
-  field: { display: 'flex', flexDirection: 'column', gap: 6 },
-  label: { fontSize: 13, fontWeight: 600, color: '#94a3b8' },
-  input: { background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', width: '100%', boxSizing: 'border-box' },
-  saveBtn: { background: '#6366f1', color: 'white', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 },
-  cancelBtn: { background: 'none', border: '1px solid #475569', color: '#94a3b8', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontSize: 14 },
-  actionBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  th: { padding: THEME.spacing.md, textAlign: 'left', fontSize: THEME.Typography.fontSize.xs, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[600], textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: `1px solid ${THEME.colors.gray[200]}` },
+  tr: { transition: `background ${THEME.transitions.fast}` },
+  td: { padding: THEME.spacing.md, fontSize: THEME.Typography.fontSize.sm, color: THEME.colors.gray[700], borderBottom: `1px solid ${THEME.colors.gray[100]}` },
+  row: { display: 'flex', gap: THEME.spacing.md },
+  field: { display: 'flex', flexDirection: 'column', gap: THEME.spacing.sm },
+  label: { fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.semibold, color: THEME.colors.gray[700] },
+  input: { background: THEME.colors.white, border: `1px solid ${THEME.colors.gray[300]}`, borderRadius: THEME.borderRadius.md, padding: THEME.spacing.md, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.sm, outline: 'none', width: '100%', boxSizing: 'border-box' },
+  saveBtn: { background: THEME.colors.blue[500], color: THEME.colors.white, border: 'none', padding: `${THEME.spacing.md}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontWeight: THEME.Typography.fontWeight.semibold, fontSize: THEME.Typography.fontSize.base },
+  cancelBtn: { background: 'none', border: `1px solid ${THEME.colors.gray[300]}`, color: THEME.colors.gray[700], padding: `${THEME.spacing.md}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontSize: THEME.Typography.fontSize.base },
+  actionBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.semibold },
 };

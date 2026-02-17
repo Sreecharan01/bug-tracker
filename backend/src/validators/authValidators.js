@@ -20,7 +20,7 @@ const registerValidator = [
 
   body('role')
     .optional()
-    .isIn(['user', 'developer', 'tester']).withMessage('Invalid role'),
+    .isIn(['user', 'admin']).withMessage('Invalid role'),
 
   body('department')
     .optional()

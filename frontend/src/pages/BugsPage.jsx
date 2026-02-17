@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bugAPI } from '../services/api';
+import { THEME } from '../theme/designSystem';
 
 const STATUSES = ['open', 'in_progress', 'resolved', 'closed', 'reopened', 'rejected'];
 const PRIORITIES = ['critical', 'high', 'medium', 'low'];
@@ -129,47 +130,139 @@ export default function BugsPage() {
 }
 
 const PBadge = ({ p }) => {
-  const map = { critical: ['#450a0a', '#ef4444'], high: ['#431407', '#f97316'], medium: ['#422006', '#eab308'], low: ['#052e16', '#22c55e'] };
-  const [bg, fg] = map[p] || ['#1e293b', '#94a3b8'];
-  return <span style={{ background: bg, color: fg, padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, textTransform: 'capitalize' }}>{p}</span>;
+  const map = {
+    critical: { bg: '#FEE2E2', fg: '#991B1B' },
+    high: { bg: '#FEF3C7', fg: '#92400E' },
+    medium: { bg: '#FEF08A', fg: '#713F12' },
+    low: { bg: '#DCFCE7', fg: '#15803D' },
+  };
+  const { bg, fg } = map[p] || { bg: THEME.colors.gray[100], fg: THEME.colors.gray[700] };
+  return (
+    <span style={{ background: bg, color: fg, padding: `${THEME.spacing.xs}px ${THEME.spacing.md}px`, borderRadius: THEME.borderRadius.full, fontSize: THEME.Typography.fontSize.xs, fontWeight: THEME.Typography.fontWeight.bold, textTransform: 'capitalize' }}>
+      {p}
+    </span>
+  );
 };
+
 const SBadge = ({ s }) => {
-  const map = { open: ['#1e1b4b', '#818cf8'], in_progress: ['#172554', '#60a5fa'], resolved: ['#052e16', '#4ade80'], closed: ['#1e293b', '#64748b'], reopened: ['#450a0a', '#f87171'], rejected: ['#1c1917', '#a8a29e'] };
-  const [bg, fg] = map[s] || ['#1e293b', '#94a3b8'];
-  return <span style={{ background: bg, color: fg, padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, textTransform: 'capitalize' }}>{s?.replace('_', ' ')}</span>;
+  const map = {
+    open: { bg: '#DBEAFE', fg: '#0C4A6E' },
+    in_progress: { bg: '#BFDBFE', fg: '#0C2D57' },
+    resolved: { bg: '#DCFCE7', fg: '#15803D' },
+    closed: { bg: '#E5E7EB', fg: '#374151' },
+    reopened: { bg: '#FEE2E2', fg: '#7C2D12' },
+    rejected: { bg: '#F3E8FF', fg: '#581C87' },
+  };
+  const { bg, fg } = map[s] || { bg: THEME.colors.gray[100], fg: THEME.colors.gray[700] };
+  return (
+    <span style={{ background: bg, color: fg, padding: `${THEME.spacing.xs}px ${THEME.spacing.md}px`, borderRadius: THEME.borderRadius.full, fontSize: THEME.Typography.fontSize.xs, fontWeight: THEME.Typography.fontWeight.semibold, textTransform: 'capitalize' }}>
+      {s?.replace('_', ' ')}
+    </span>
+  );
 };
+
 const Spinner = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
-    <div style={{ width: 36, height: 36, border: '3px solid #334155', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+  <div style={{ display: 'flex', justifyContent: 'center', padding: THEME.spacing['2xl'] }}>
+    <div style={{ width: 36, height: 36, border: `3px solid ${THEME.colors.gray[300]}`, borderTopColor: THEME.colors.blue[500], borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
   </div>
 );
 
 const s = {
-  page: { maxWidth: 1400, margin: '0 auto', fontFamily: 'Inter, system-ui, sans-serif' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  title: { margin: 0, fontSize: 26, fontWeight: 700, color: '#e2e8f0' },
-  sub: { margin: '4px 0 0', color: '#64748b', fontSize: 14 },
-  newBtn: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 },
-  filters: { display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' },
-  search: { background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '9px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', flex: '1 1 220px', minWidth: 180 },
-  input: { background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '9px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', width: 160 },
-  select: { background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '9px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', cursor: 'pointer' },
-  clearBtn: { background: 'none', border: '1px solid #475569', color: '#94a3b8', padding: '9px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 13 },
-  tableBox: { background: '#1e293b', borderRadius: 12, border: '1px solid #334155', overflow: 'auto' },
-  loader: { padding: 48 },
+  page: { maxWidth: 1400, margin: '0 auto', fontFamily: THEME.Typography.fontFamily },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: THEME.spacing.xl },
+  title: { margin: 0, fontSize: THEME.Typography.fontSize['2xl'], fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900] },
+  sub: { margin: `${THEME.spacing.sm}px 0 0`, color: THEME.colors.gray[500], fontSize: THEME.Typography.fontSize.base },
+  newBtn: {
+    background: THEME.colors.blue[500],
+    color: THEME.colors.white,
+    border: 'none',
+    padding: `${THEME.spacing.sm}px ${THEME.spacing.lg}px`,
+    borderRadius: THEME.borderRadius.md,
+    cursor: 'pointer',
+    fontWeight: THEME.Typography.fontWeight.semibold,
+    transition: `all ${THEME.transitions.fast}`,
+  },
+  filters: { display: 'flex', gap: THEME.spacing.md, marginBottom: THEME.spacing.lg, flexWrap: 'wrap', alignItems: 'center' },
+  search: {
+    background: THEME.colors.white,
+    border: `1px solid ${THEME.colors.gray[300]}`,
+    borderRadius: THEME.borderRadius.md,
+    padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`,
+    color: THEME.colors.gray[900],
+    fontSize: THEME.Typography.fontSize.sm,
+    outline: 'none',
+    flex: '1 1 220px',
+    minWidth: 180,
+  },
+  input: {
+    background: THEME.colors.white,
+    border: `1px solid ${THEME.colors.gray[300]}`,
+    borderRadius: THEME.borderRadius.md,
+    padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`,
+    color: THEME.colors.gray[900],
+    fontSize: THEME.Typography.fontSize.sm,
+    outline: 'none',
+    width: 160,
+  },
+  select: {
+    background: THEME.colors.white,
+    border: `1px solid ${THEME.colors.gray[300]}`,
+    borderRadius: THEME.borderRadius.md,
+    padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`,
+    color: THEME.colors.gray[900],
+    fontSize: THEME.Typography.fontSize.sm,
+    outline: 'none',
+    cursor: 'pointer',
+  },
+  clearBtn: { background: 'none', border: `1px solid ${THEME.colors.gray[300]}`, color: THEME.colors.gray[600], padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontSize: THEME.Typography.fontSize.sm },
+  tableBox: { background: THEME.colors.white, borderRadius: THEME.borderRadius.lg, border: `1px solid ${THEME.colors.gray[200]}`, overflow: 'auto', boxShadow: THEME.shadows.sm },
+  loader: { padding: THEME.spacing['2xl'] },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 900 },
-  th: { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px solid #334155', whiteSpace: 'nowrap' },
-  tr: { cursor: 'pointer', transition: 'background 0.1s' },
-  td: { padding: '12px 16px', fontSize: 13, color: '#cbd5e1', borderBottom: '1px solid #1e293b' },
-  bugId: { color: '#6366f1', fontWeight: 700, fontSize: 12, fontFamily: 'monospace' },
-  bugTitle: { fontWeight: 500, color: '#e2e8f0', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 },
-  tag: { background: '#1e3a5f', color: '#7dd3fc', fontSize: 10, padding: '1px 6px', borderRadius: 4, fontWeight: 500 },
-  project: { color: '#94a3b8' },
-  severity: { color: '#64748b', textTransform: 'capitalize', fontSize: 12 },
-  assignee: { display: 'flex', alignItems: 'center', gap: 8 },
-  avatar: { width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 },
-  pagination: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 20 },
-  pageBtn: { background: '#1e293b', border: '1px solid #334155', color: '#94a3b8', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 13 },
-  pageInfo: { color: '#64748b', fontSize: 13 },
+  th: {
+    padding: THEME.spacing.md,
+    textAlign: 'left',
+    fontSize: THEME.Typography.fontSize.xs,
+    fontWeight: THEME.Typography.fontWeight.bold,
+    color: THEME.colors.gray[600],
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    borderBottom: `1px solid ${THEME.colors.gray[200]}`,
+    whiteSpace: 'nowrap',
+  },
+  tr: { cursor: 'pointer', transition: `background ${THEME.transitions.fast}` },
+  td: { padding: THEME.spacing.md, fontSize: THEME.Typography.fontSize.sm, color: THEME.colors.gray[700], borderBottom: `1px solid ${THEME.colors.gray[100]}` },
+  bugId: { color: THEME.colors.blue[600], fontWeight: THEME.Typography.fontWeight.bold, fontSize: THEME.Typography.fontSize.xs, fontFamily: 'monospace' },
+  bugTitle: {
+    fontWeight: THEME.Typography.fontWeight.medium,
+    color: THEME.colors.gray[900],
+    display: 'block',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: 260,
+  },
+  tag: {
+    background: THEME.colors.blue[100],
+    color: THEME.colors.blue[700],
+    fontSize: THEME.Typography.fontSize.xs,
+    padding: `${THEME.spacing.xs}px ${THEME.spacing.sm}px`,
+    borderRadius: THEME.borderRadius.sm,
+    fontWeight: THEME.Typography.fontWeight.medium,
+  },
+  project: { color: THEME.colors.gray[600] },
+  severity: { color: THEME.colors.gray[600], textTransform: 'capitalize', fontSize: THEME.Typography.fontSize.xs },
+  assignee: { display: 'flex', alignItems: 'center', gap: THEME.spacing.md },
+  avatar: { width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.white, flexShrink: 0 },
+  pagination: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: THEME.spacing.lg, marginTop: THEME.spacing.xl },
+  pageBtn: {
+    background: THEME.colors.white,
+    border: `1px solid ${THEME.colors.gray[300]}`,
+    color: THEME.colors.gray[700],
+    padding: `${THEME.spacing.sm}px ${THEME.spacing.lg}px`,
+    borderRadius: THEME.borderRadius.md,
+    cursor: 'pointer',
+    fontSize: THEME.Typography.fontSize.sm,
+  },
+  pageInfo: { color: THEME.colors.gray[600], fontSize: THEME.Typography.fontSize.sm },
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bugAPI, userAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { THEME } from '../theme/designSystem';
 
 export default function CreateBugPage() {
   const navigate = useNavigate();
@@ -140,32 +141,41 @@ export default function CreateBugPage() {
 }
 
 const Field = ({ label, name, value, onChange, multiline, rows = 3, ...rest }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16, flex: 1 }}>
-    <label style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>{label}</label>
-    {multiline
-      ? <textarea name={name} value={value} onChange={onChange} rows={rows} style={s.input} {...rest} />
-      : <input name={name} value={value} onChange={onChange} style={s.input} {...rest} />}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.spacing.sm, marginBottom: THEME.spacing.lg, flex: 1 }}>
+    <label style={{ fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.semibold, color: THEME.colors.gray[700] }}>
+      {label}
+    </label>
+    {multiline ? (
+      <textarea name={name} value={value} onChange={onChange} rows={rows} style={s.input} {...rest} />
+    ) : (
+      <input name={name} value={value} onChange={onChange} style={s.input} {...rest} />
+    )}
   </div>
 );
+
 const SelectField = ({ label, name, value, onChange, children }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-    <label style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>{label}</label>
-    <select name={name} value={value} onChange={onChange} style={s.input}>{children}</select>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.spacing.sm, marginBottom: THEME.spacing.lg }}>
+    <label style={{ fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.semibold, color: THEME.colors.gray[700] }}>
+      {label}
+    </label>
+    <select name={name} value={value} onChange={onChange} style={s.input}>
+      {children}
+    </select>
   </div>
 );
 
 const s = {
-  page: { maxWidth: 1100, margin: '0 auto', fontFamily: 'Inter, system-ui, sans-serif' },
-  back: { background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: 14, fontWeight: 600, marginBottom: 20, padding: 0 },
-  title: { margin: '0 0 24px', fontSize: 26, fontWeight: 700, color: '#e2e8f0' },
-  alert: { background: '#450a0a', border: '1px solid #dc2626', color: '#fca5a5', padding: '12px 16px', borderRadius: 8, marginBottom: 20, fontSize: 14 },
-  grid: { display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20 },
-  col: { display: 'flex', flexDirection: 'column', gap: 20 },
-  card: { background: '#1e293b', borderRadius: 12, padding: 24, border: '1px solid #334155' },
-  cardTitle: { margin: '0 0 20px', fontSize: 15, fontWeight: 700, color: '#e2e8f0' },
-  row: { display: 'flex', gap: 16 },
-  input: { background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', resize: 'vertical', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' },
-  actions: { display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 },
-  cancelBtn: { background: 'none', border: '1px solid #475569', color: '#94a3b8', padding: '10px 24px', borderRadius: 8, cursor: 'pointer', fontSize: 14 },
-  submitBtn: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '10px 28px', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 },
+  page: { maxWidth: 1100, margin: '0 auto', fontFamily: THEME.Typography.fontFamily },
+  back: { background: 'none', border: 'none', color: THEME.colors.blue[600], cursor: 'pointer', fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.semibold, marginBottom: THEME.spacing.xl, padding: 0 },
+  title: { margin: `0 0 ${THEME.spacing.xl}px`, fontSize: THEME.Typography.fontSize['2xl'], fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900] },
+  alert: { background: '#FEE2E2', border: `1px solid ${THEME.colors.error}`, color: '#991B1B', padding: `${THEME.spacing.md}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, marginBottom: THEME.spacing.lg, fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.medium },
+  grid: { display: 'grid', gridTemplateColumns: '1fr 360px', gap: THEME.spacing.xl },
+  col: { display: 'flex', flexDirection: 'column', gap: THEME.spacing.xl },
+  card: { background: THEME.colors.white, borderRadius: THEME.borderRadius.lg, padding: THEME.spacing.xl, border: `1px solid ${THEME.colors.gray[200]}`, boxShadow: THEME.shadows.sm },
+  cardTitle: { margin: `0 0 ${THEME.spacing.lg}px`, fontSize: THEME.Typography.fontSize.base, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900] },
+  row: { display: 'flex', gap: THEME.spacing.lg },
+  input: { background: THEME.colors.white, border: `1px solid ${THEME.colors.gray[300]}`, borderRadius: THEME.borderRadius.md, padding: THEME.spacing.md, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.sm, outline: 'none', resize: 'vertical', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' },
+  actions: { display: 'flex', justifyContent: 'flex-end', gap: THEME.spacing.md, marginTop: THEME.spacing.xl },
+  cancelBtn: { background: 'none', border: `1px solid ${THEME.colors.gray[300]}`, color: THEME.colors.gray[700], padding: `${THEME.spacing.md}px ${THEME.spacing.xl}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontSize: THEME.Typography.fontSize.base },
+  submitBtn: { background: THEME.colors.blue[500], color: THEME.colors.white, border: 'none', padding: `${THEME.spacing.md}px ${THEME.spacing.xl}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontWeight: THEME.Typography.fontWeight.semibold, fontSize: THEME.Typography.fontSize.base },
 };

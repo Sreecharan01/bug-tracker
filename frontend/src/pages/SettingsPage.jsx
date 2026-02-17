@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { settingsAPI } from '../services/api';
+import { THEME } from '../theme/designSystem';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState([]);
@@ -96,21 +97,21 @@ export default function SettingsPage() {
 }
 
 const s = {
-  page: { maxWidth: 900, margin: '0 auto', fontFamily: 'Inter, system-ui, sans-serif' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 },
-  title: { margin: 0, fontSize: 26, fontWeight: 700, color: '#e2e8f0' },
-  sub: { margin: '4px 0 0', color: '#64748b', fontSize: 14 },
-  saveBtn: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 },
-  section: { background: '#1e293b', borderRadius: 12, border: '1px solid #334155', marginBottom: 20, overflow: 'hidden' },
-  catTitle: { margin: 0, padding: '16px 24px', fontSize: 14, fontWeight: 700, color: '#e2e8f0', borderBottom: '1px solid #334155', background: '#0f172a', textTransform: 'capitalize' },
-  settingsList: { padding: '8px 0' },
-  settingRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid #0f172a', gap: 20 },
-  settingInfo: { display: 'flex', flexDirection: 'column', gap: 2 },
-  settingKey: { fontSize: 14, fontWeight: 600, color: '#e2e8f0' },
-  settingDesc: { fontSize: 12, color: '#64748b' },
-  settingCode: { fontSize: 11, color: '#475569', fontFamily: 'monospace' },
-  settingControl: { display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 },
-  settingInput: { background: '#0f172a', border: '1px solid #334155', borderRadius: 6, padding: '7px 12px', color: '#e2e8f0', fontSize: 13, outline: 'none', width: 220 },
+  page: { maxWidth: 900, margin: '0 auto', fontFamily: THEME.Typography.fontFamily },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: THEME.spacing.xl },
+  title: { margin: 0, fontSize: THEME.Typography.fontSize['2xl'], fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900] },
+  sub: { margin: `${THEME.spacing.sm}px 0 0`, color: THEME.colors.gray[500], fontSize: THEME.Typography.fontSize.base },
+  saveBtn: { background: THEME.colors.blue[500], color: THEME.colors.white, border: 'none', padding: `${THEME.spacing.md}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontWeight: THEME.Typography.fontWeight.semibold },
+  section: { background: THEME.colors.white, borderRadius: THEME.borderRadius.lg, border: `1px solid ${THEME.colors.gray[200]}`, marginBottom: THEME.spacing.lg, overflow: 'hidden', boxShadow: THEME.shadows.sm },
+  catTitle: { margin: 0, padding: `${THEME.spacing.md}px ${THEME.spacing.xl}px`, fontSize: THEME.Typography.fontSize.base, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900], borderBottom: `1px solid ${THEME.colors.gray[200]}`, background: THEME.colors.gray[50], textTransform: 'capitalize' },
+  settingsList: { padding: `${THEME.spacing.md}px 0` },
+  settingRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${THEME.spacing.md}px ${THEME.spacing.xl}px`, borderBottom: `1px solid ${THEME.colors.gray[100]}`, gap: THEME.spacing.lg },
+  settingInfo: { display: 'flex', flexDirection: 'column', gap: THEME.spacing.xs },
+  settingKey: { fontSize: THEME.Typography.fontSize.base, fontWeight: THEME.Typography.fontWeight.semibold, color: THEME.colors.gray[900] },
+  settingDesc: { fontSize: THEME.Typography.fontSize.sm, color: THEME.colors.gray[600] },
+  settingCode: { fontSize: THEME.Typography.fontSize.xs, color: THEME.colors.gray[500], fontFamily: 'monospace' },
+  settingControl: { display: 'flex', alignItems: 'center', gap: THEME.spacing.md, flexShrink: 0 },
+  settingInput: { background: THEME.colors.white, border: `1px solid ${THEME.colors.gray[300]}`, borderRadius: THEME.borderRadius.md, padding: `${THEME.spacing.sm - 1}px ${THEME.spacing.md}px`, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.sm, outline: 'none', width: 220 },
   toggle: { cursor: 'pointer' },
-  privateBadge: { fontSize: 10, color: '#64748b' },
+  privateBadge: { fontSize: THEME.Typography.fontSize.xs, color: THEME.colors.gray[500] },
 };

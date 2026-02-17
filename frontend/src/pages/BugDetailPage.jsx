@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { bugAPI, userAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { THEME } from '../theme/designSystem';
 
 export default function BugDetailPage() {
   const { id } = useParams();
@@ -246,70 +247,116 @@ const PersonRow = ({ label, user, empty = '' }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
     <span style={{ fontSize: 12, color: '#64748b' }}>{label}</span>
     {user ? (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: THEME.spacing.sm }}>
+        <div
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            background: THEME.colors.blue[500],
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: THEME.Typography.fontSize.xs,
+            fontWeight: THEME.Typography.fontWeight.bold,
+            color: THEME.colors.white,
+          }}
+        >
           {user.name?.[0]}
         </div>
-        <span style={{ fontSize: 13, color: '#cbd5e1' }}>{user.name}</span>
+        <span style={{ fontSize: THEME.Typography.fontSize.sm, color: THEME.colors.gray[700] }}>{user.name}</span>
       </div>
-    ) : <span style={{ fontSize: 12, color: '#475569' }}>{empty}</span>}
+    ) : (
+      <span style={{ fontSize: THEME.Typography.fontSize.xs, color: THEME.colors.gray[400] }}>{empty}</span>
+    )}
   </div>
 );
 
 const SBadge = ({ s }) => {
-  const map = { open: ['#1e1b4b', '#818cf8'], in_progress: ['#172554', '#60a5fa'], resolved: ['#052e16', '#4ade80'], closed: ['#1e293b', '#64748b'], reopened: ['#450a0a', '#f87171'], rejected: ['#1c1917', '#a8a29e'] };
-  const [bg, fg] = map[s] || ['#1e293b', '#94a3b8'];
-  return <span style={{ background: bg, color: fg, padding: '3px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, textTransform: 'capitalize' }}>{s?.replace('_', ' ')}</span>;
+  const map = {
+    open: { bg: '#DBEAFE', fg: '#0C4A6E' },
+    in_progress: { bg: '#BFDBFE', fg: '#0C2D57' },
+    resolved: { bg: '#DCFCE7', fg: '#15803D' },
+    closed: { bg: '#E5E7EB', fg: '#374151' },
+    reopened: { bg: '#FEE2E2', fg: '#7C2D12' },
+    rejected: { bg: '#F3E8FF', fg: '#581C87' },
+  };
+  const { bg, fg } = map[s] || { bg: THEME.colors.gray[100], fg: THEME.colors.gray[700] };
+  return (
+    <span style={{ background: bg, color: fg, padding: `${THEME.spacing.xs}px ${THEME.spacing.md}px`, borderRadius: THEME.borderRadius.full, fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.semibold, textTransform: 'capitalize' }}>
+      {s?.replace('_', ' ')}
+    </span>
+  );
 };
+
 const PBadge = ({ p }) => {
-  const map = { critical: ['#450a0a', '#ef4444'], high: ['#431407', '#f97316'], medium: ['#422006', '#eab308'], low: ['#052e16', '#22c55e'] };
-  const [bg, fg] = map[p] || ['#1e293b', '#94a3b8'];
-  return <span style={{ background: bg, color: fg, padding: '3px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, textTransform: 'capitalize' }}>{p}</span>;
+  const map = {
+    critical: { bg: '#FEE2E2', fg: '#991B1B' },
+    high: { bg: '#FEF3C7', fg: '#92400E' },
+    medium: { bg: '#FEF08A', fg: '#713F12' },
+    low: { bg: '#DCFCE7', fg: '#15803D' },
+  };
+  const { bg, fg } = map[p] || { bg: THEME.colors.gray[100], fg: THEME.colors.gray[700] };
+  return (
+    <span style={{ background: bg, color: fg, padding: `${THEME.spacing.xs}px ${THEME.spacing.md}px`, borderRadius: THEME.borderRadius.full, fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.bold, textTransform: 'capitalize' }}>
+      {p}
+    </span>
+  );
 };
+
 const Loader = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
-    <div style={{ width: 40, height: 40, border: '3px solid #334155', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+  <div style={{ display: 'flex', justifyContent: 'center', padding: THEME.spacing['3xl'] }}>
+    <div
+      style={{
+        width: 40,
+        height: 40,
+        border: `3px solid ${THEME.colors.gray[300]}`,
+        borderTopColor: THEME.colors.blue[500],
+        borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite',
+      }}
+    />
     <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
   </div>
 );
 
 const s = {
-  page: { maxWidth: 1200, margin: '0 auto', fontFamily: 'Inter, system-ui, sans-serif' },
-  back: { background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: 14, fontWeight: 600, marginBottom: 20, padding: 0 },
-  grid: { display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'start' },
-  main: { display: 'flex', flexDirection: 'column', gap: 20 },
-  sidebar: { display: 'flex', flexDirection: 'column', gap: 16 },
-  card: { background: '#1e293b', borderRadius: 12, padding: 24, border: '1px solid #334155' },
-  bugHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  bugId: { color: '#6366f1', fontWeight: 700, fontSize: 14, fontFamily: 'monospace' },
-  title: { margin: '0 0 20px', fontSize: 22, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.4 },
-  editForm: { background: '#0f172a', borderRadius: 10, padding: 16, marginBottom: 16, border: '1px solid #334155' },
-  editGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 },
-  field: { display: 'flex', flexDirection: 'column', gap: 6 },
-  input: { background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '8px 12px', color: '#e2e8f0', fontSize: 13, outline: 'none' },
-  label: { fontSize: 12, fontWeight: 600, color: '#94a3b8' },
-  divider: { height: 1, background: '#334155', margin: '16px 0' },
-  sectionTitle: { margin: '0 0 12px', fontSize: 13, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 },
-  desc: { margin: 0, color: '#cbd5e1', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap' },
-  pre: { margin: 0, color: '#cbd5e1', fontSize: 13, lineHeight: 1.8, whiteSpace: 'pre-wrap', background: '#0f172a', borderRadius: 8, padding: 16 },
-  twoCol: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 },
-  tag: { background: '#1e3a5f', color: '#7dd3fc', fontSize: 11, padding: '2px 8px', borderRadius: 4 },
-  commentItem: { background: '#0f172a', borderRadius: 8, padding: 12, border: '1px solid #334155' },
-  commentHeader: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 },
-  avatar: { width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'white' },
-  commentAuthor: { fontWeight: 600, fontSize: 13, color: '#e2e8f0' },
-  commentDate: { color: '#475569', fontSize: 11, marginLeft: 'auto' },
-  commentText: { margin: 0, color: '#94a3b8', fontSize: 13, lineHeight: 1.6 },
-  commentInput: { background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 14px', color: '#e2e8f0', fontSize: 13, outline: 'none', resize: 'vertical', flex: 1 },
-  detailRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid #0f172a' },
-  detailLabel: { fontSize: 12, color: '#64748b' },
-  detailVal: { fontSize: 13, color: '#cbd5e1', textTransform: 'capitalize' },
-  historyItem: { display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 0', borderBottom: '1px solid #334155' },
-  historyField: { fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' },
-  historyChange: { fontSize: 12, color: '#cbd5e1' },
-  historyDate: { fontSize: 11, color: '#475569' },
-  saveBtn: { background: '#6366f1', color: 'white', border: 'none', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13 },
-  cancelBtn: { background: 'none', border: '1px solid #475569', color: '#94a3b8', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 13 },
-  editBtn: { background: '#334155', color: '#e2e8f0', border: 'none', padding: '7px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 13 },
-  deleteBtn: { background: '#450a0a', color: '#ef4444', border: '1px solid #7f1d1d', padding: '7px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 13 },
+  page: { maxWidth: 1200, margin: '0 auto', fontFamily: THEME.Typography.fontFamily },
+  back: { background: 'none', border: 'none', color: THEME.colors.blue[600], cursor: 'pointer', fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.semibold, marginBottom: THEME.spacing.xl, padding: 0 },
+  grid: { display: 'grid', gridTemplateColumns: '1fr 300px', gap: THEME.spacing.xl, alignItems: 'start' },
+  main: { display: 'flex', flexDirection: 'column', gap: THEME.spacing.xl },
+  sidebar: { display: 'flex', flexDirection: 'column', gap: THEME.spacing.lg },
+  card: { background: THEME.colors.white, borderRadius: THEME.borderRadius.lg, padding: THEME.spacing.xl, border: `1px solid ${THEME.colors.gray[200]}`, boxShadow: THEME.shadows.sm },
+  bugHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: THEME.spacing.md },
+  bugId: { color: THEME.colors.blue[600], fontWeight: THEME.Typography.fontWeight.bold, fontSize: THEME.Typography.fontSize.base, fontFamily: 'monospace' },
+  title: { margin: `0 0 ${THEME.spacing.lg}px`, fontSize: THEME.Typography.fontSize.xl, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[900], lineHeight: 1.4 },
+  editForm: { background: THEME.colors.gray[50], borderRadius: THEME.borderRadius.lg, padding: THEME.spacing.lg, marginBottom: THEME.spacing.md, border: `1px solid ${THEME.colors.gray[200]}` },
+  editGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: THEME.spacing.md },
+  field: { display: 'flex', flexDirection: 'column', gap: THEME.spacing.sm },
+  input: { background: THEME.colors.white, border: `1px solid ${THEME.colors.gray[300]}`, borderRadius: THEME.borderRadius.md, padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.sm, outline: 'none' },
+  label: { fontSize: THEME.Typography.fontSize.xs, fontWeight: THEME.Typography.fontWeight.semibold, color: THEME.colors.gray[700] },
+  divider: { height: 1, background: THEME.colors.gray[200], margin: `${THEME.spacing.lg}px 0` },
+  sectionTitle: { margin: `0 0 ${THEME.spacing.md}px`, fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[600], textTransform: 'uppercase', letterSpacing: 0.5 },
+  desc: { margin: 0, color: THEME.colors.gray[700], fontSize: THEME.Typography.fontSize.base, lineHeight: 1.6, whiteSpace: 'pre-wrap' },
+  pre: { margin: 0, color: THEME.colors.gray[700], fontSize: THEME.Typography.fontSize.sm, lineHeight: 1.8, whiteSpace: 'pre-wrap', background: THEME.colors.gray[50], borderRadius: THEME.borderRadius.md, padding: THEME.spacing.md },
+  twoCol: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: THEME.spacing.lg, marginTop: THEME.spacing.lg },
+  tag: { background: THEME.colors.blue[100], color: THEME.colors.blue[700], fontSize: THEME.Typography.fontSize.xs, padding: `${THEME.spacing.xs}px ${THEME.spacing.sm}px`, borderRadius: THEME.borderRadius.sm },
+  commentItem: { background: THEME.colors.gray[50], borderRadius: THEME.borderRadius.md, padding: THEME.spacing.md, border: `1px solid ${THEME.colors.gray[200]}` },
+  commentHeader: { display: 'flex', alignItems: 'center', gap: THEME.spacing.md, marginBottom: THEME.spacing.md },
+  avatar: { width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: THEME.Typography.fontSize.xs, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.white, background: THEME.colors.blue[500] },
+  commentAuthor: { fontWeight: THEME.Typography.fontWeight.semibold, fontSize: THEME.Typography.fontSize.sm, color: THEME.colors.gray[900] },
+  commentDate: { color: THEME.colors.gray[500], fontSize: THEME.Typography.fontSize.xs, marginLeft: 'auto' },
+  commentText: { margin: 0, color: THEME.colors.gray[700], fontSize: THEME.Typography.fontSize.sm, lineHeight: 1.6 },
+  commentInput: { background: THEME.colors.white, border: `1px solid ${THEME.colors.gray[300]}`, borderRadius: THEME.borderRadius.md, padding: THEME.spacing.md, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.sm, outline: 'none', resize: 'vertical', flex: 1 },
+  detailRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${THEME.spacing.sm}px 0`, borderBottom: `1px solid ${THEME.colors.gray[200]}` },
+  detailLabel: { fontSize: THEME.Typography.fontSize.xs, color: THEME.colors.gray[600] },
+  detailVal: { fontSize: THEME.Typography.fontSize.sm, color: THEME.colors.gray[700], textTransform: 'capitalize' },
+  historyItem: { display: 'flex', flexDirection: 'column', gap: THEME.spacing.xs, padding: THEME.spacing.md, borderBottom: `1px solid ${THEME.colors.gray[200]}` },
+  historyField: { fontSize: THEME.Typography.fontSize.xs, fontWeight: THEME.Typography.fontWeight.bold, color: THEME.colors.gray[600], textTransform: 'uppercase' },
+  historyChange: { fontSize: THEME.Typography.fontSize.sm, color: THEME.colors.gray[700] },
+  historyDate: { fontSize: THEME.Typography.fontSize.xs, color: THEME.colors.gray[500] },
+  saveBtn: { background: THEME.colors.blue[500], color: THEME.colors.white, border: 'none', padding: `${THEME.spacing.sm}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontWeight: THEME.Typography.fontWeight.semibold, fontSize: THEME.Typography.fontSize.sm },
+  cancelBtn: { background: 'none', border: `1px solid ${THEME.colors.gray[300]}`, color: THEME.colors.gray[700], padding: `${THEME.spacing.sm}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontSize: THEME.Typography.fontSize.sm },
+  editBtn: { background: THEME.colors.gray[200], color: THEME.colors.gray[800], border: 'none', padding: `${THEME.spacing.sm - 1}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontSize: THEME.Typography.fontSize.sm },
+  deleteBtn: { background: '#FEE2E2', color: '#991B1B', border: `1px solid #FECACA`, padding: `${THEME.spacing.sm - 1}px ${THEME.spacing.lg}px`, borderRadius: THEME.borderRadius.md, cursor: 'pointer', fontSize: THEME.Typography.fontSize.sm },
 };

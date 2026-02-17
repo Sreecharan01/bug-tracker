@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { THEME } from '../theme/designSystem';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -43,16 +44,29 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} style={s.form}>
           <div style={s.field}>
             <label style={s.label}>Email Address</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange}
-              placeholder="admin@bugtracker.com" style={s.input} required />
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="admin@bugtracker.com"
+              style={s.input}
+              required
+            />
           </div>
 
           <div style={s.field}>
             <label style={s.label}>Password</label>
             <div style={s.inputWrap}>
-              <input name="password" type={showPassword ? 'text' : 'password'}
-                value={form.password} onChange={handleChange}
-                placeholder="••••••••" style={{ ...s.input, paddingRight: 44 }} required />
+              <input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                style={{ ...s.input, paddingRight: 44 }}
+                required
+              />
               <button type="button" style={s.eyeBtn} onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? '🙈' : '👁'}
               </button>
@@ -68,9 +82,9 @@ export default function LoginPage() {
           <p style={s.demoTitle}>Demo Credentials</p>
           <div style={s.demoGrid}>
             {[
-              { role: 'Admin', email: 'admin@bugtracker.com', pass: 'Admin@1234', color: '#ef4444' },
-              { role: 'Developer', email: 'dev@bugtracker.com', pass: 'Dev@12345', color: '#3b82f6' },
-              { role: 'Tester', email: 'tester@bugtracker.com', pass: 'Test@1234', color: '#10b981' },
+              { role: 'Admin', email: 'admin@bugtracker.com', pass: 'Admin@1234', color: THEME.colors.error },
+              { role: 'Developer', email: 'dev@bugtracker.com', pass: 'Dev@12345', color: THEME.colors.blue[500] },
+              { role: 'Tester', email: 'tester@bugtracker.com', pass: 'Test@1234', color: THEME.colors.success },
             ].map((d) => (
               <button key={d.role} style={s.demoBtn} onClick={() => setForm({ email: d.email, password: d.pass })}>
                 <span style={{ ...s.demoBadge, background: d.color }}>{d.role}</span>
@@ -82,7 +96,9 @@ export default function LoginPage() {
 
         <p style={s.footer}>
           Don't have an account?{' '}
-          <Link to="/register" style={s.link}>Create one</Link>
+          <Link to="/register" style={s.link}>
+            Create one
+          </Link>
         </p>
       </div>
     </div>
@@ -90,26 +106,158 @@ export default function LoginPage() {
 }
 
 const s = {
-  page: { minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: 'Inter, system-ui, sans-serif' },
-  card: { background: '#1e293b', borderRadius: 16, padding: 40, width: '100%', maxWidth: 440, border: '1px solid #334155', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' },
-  brand: { textAlign: 'center', marginBottom: 32 },
-  brandIcon: { fontSize: 40 },
-  brandName: { margin: '8px 0 4px', fontSize: 28, fontWeight: 700, color: '#e2e8f0' },
-  brandSub: { margin: 0, color: '#64748b', fontSize: 14 },
-  alert: { background: '#450a0a', border: '1px solid #dc2626', color: '#fca5a5', padding: '12px 16px', borderRadius: 8, marginBottom: 20, fontSize: 14 },
-  form: { display: 'flex', flexDirection: 'column', gap: 20 },
-  field: { display: 'flex', flexDirection: 'column', gap: 6 },
-  label: { fontSize: 13, fontWeight: 600, color: '#94a3b8' },
-  input: { background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '11px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', width: '100%', boxSizing: 'border-box' },
+  page: {
+    minHeight: '100vh',
+    background: THEME.colors.background.primary,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: THEME.spacing.lg,
+    fontFamily: THEME.Typography.fontFamily,
+  },
+  card: {
+    background: THEME.colors.white,
+    borderRadius: THEME.borderRadius.xl,
+    padding: THEME.spacing['2xl'],
+    width: '100%',
+    maxWidth: 440,
+    border: `1px solid ${THEME.colors.gray[200]}`,
+    boxShadow: THEME.shadows.lg,
+  },
+  brand: { textAlign: 'center', marginBottom: THEME.spacing['2xl'] },
+  brandIcon: { fontSize: 40, display: 'block', marginBottom: THEME.spacing.md },
+  brandName: {
+    margin: 0,
+    marginBottom: THEME.spacing.sm,
+    fontSize: THEME.Typography.fontSize['3xl'],
+    fontWeight: THEME.Typography.fontWeight.bold,
+    color: THEME.colors.gray[900],
+  },
+  brandSub: {
+    margin: 0,
+    color: THEME.colors.gray[500],
+    fontSize: THEME.Typography.fontSize.base,
+  },
+  alert: {
+    background: '#FEE2E2',
+    border: `1px solid ${THEME.colors.error}`,
+    color: '#991B1B',
+    padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`,
+    borderRadius: THEME.borderRadius.md,
+    marginBottom: THEME.spacing.lg,
+    fontSize: THEME.Typography.fontSize.sm,
+    fontWeight: THEME.Typography.fontWeight.medium,
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: THEME.spacing.lg,
+  },
+  field: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: THEME.spacing.sm,
+  },
+  label: {
+    fontSize: THEME.Typography.fontSize.sm,
+    fontWeight: THEME.Typography.fontWeight.semibold,
+    color: THEME.colors.gray[700],
+  },
+  input: {
+    background: THEME.colors.white,
+    border: `1px solid ${THEME.colors.gray[300]}`,
+    borderRadius: THEME.borderRadius.md,
+    padding: `${THEME.spacing.sm}px ${THEME.spacing.md}px`,
+    color: THEME.colors.gray[900],
+    fontSize: THEME.Typography.fontSize.sm,
+    outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box',
+    transition: `border ${THEME.transitions.fast}`,
+  },
   inputWrap: { position: 'relative' },
-  eyeBtn: { position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 0 },
-  btn: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '13px', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', marginTop: 4 },
-  demo: { marginTop: 28, padding: 16, background: '#0f172a', borderRadius: 10, border: '1px solid #1e293b' },
-  demoTitle: { margin: '0 0 12px', fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 },
-  demoGrid: { display: 'flex', flexDirection: 'column', gap: 8 },
-  demoBtn: { display: 'flex', alignItems: 'center', gap: 10, background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', textAlign: 'left', width: '100%' },
-  demoBadge: { color: 'white', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, minWidth: 64, textAlign: 'center' },
-  demoEmail: { color: '#94a3b8', fontSize: 12 },
-  footer: { textAlign: 'center', marginTop: 24, color: '#64748b', fontSize: 14 },
-  link: { color: '#6366f1', textDecoration: 'none', fontWeight: 600 },
+  eyeBtn: {
+    position: 'absolute',
+    right: THEME.spacing.md,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: 16,
+    padding: 0,
+  },
+  btn: {
+    background: THEME.colors.blue[500],
+    color: THEME.colors.white,
+    border: 'none',
+    padding: `${THEME.spacing.sm + 1}px ${THEME.spacing.lg}px`,
+    borderRadius: THEME.borderRadius.md,
+    fontSize: THEME.Typography.fontSize.base,
+    fontWeight: THEME.Typography.fontWeight.semibold,
+    cursor: 'pointer',
+    marginTop: THEME.spacing.lg,
+    transition: `all ${THEME.transitions.fast}`,
+  },
+  demo: {
+    marginTop: THEME.spacing.xl,
+    padding: THEME.spacing.lg,
+    background: THEME.colors.gray[50],
+    borderRadius: THEME.borderRadius.lg,
+    border: `1px solid ${THEME.colors.gray[200]}`,
+  },
+  demoTitle: {
+    margin: 0,
+    marginBottom: THEME.spacing.md,
+    fontSize: THEME.Typography.fontSize.xs,
+    color: THEME.colors.gray[600],
+    fontWeight: THEME.Typography.fontWeight.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  demoGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: THEME.spacing.md,
+  },
+  demoBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: THEME.spacing.md,
+    background: THEME.colors.white,
+    border: `1px solid ${THEME.colors.gray[200]}`,
+    borderRadius: THEME.borderRadius.md,
+    padding: `${THEME.spacing.md}px ${THEME.spacing.md}px`,
+    cursor: 'pointer',
+    textAlign: 'left',
+    width: '100%',
+    transition: `all ${THEME.transitions.fast}`,
+  },
+  demoBadge: {
+    color: THEME.colors.white,
+    fontSize: THEME.Typography.fontSize.xs,
+    fontWeight: THEME.Typography.fontWeight.bold,
+    padding: `${THEME.spacing.xs}px ${THEME.spacing.md}px`,
+    borderRadius: THEME.borderRadius.full,
+    minWidth: 64,
+    textAlign: 'center',
+  },
+  demoEmail: {
+    color: THEME.colors.gray[600],
+    fontSize: THEME.Typography.fontSize.sm,
+    flex: 1,
+  },
+  footer: {
+    textAlign: 'center',
+    marginTop: THEME.spacing.xl,
+    color: THEME.colors.gray[600],
+    fontSize: THEME.Typography.fontSize.sm,
+    margin: 0,
+  },
+  link: {
+    color: THEME.colors.blue[600],
+    textDecoration: 'none',
+    fontWeight: THEME.Typography.fontWeight.semibold,
+    transition: `color ${THEME.transitions.fast}`,
+  },
 };

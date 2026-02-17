@@ -20,7 +20,7 @@ userRouter.route('/')
     body('name').trim().notEmpty().isLength({ min: 2 }),
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 8 }),
-    body('role').optional().isIn(['admin', 'user', 'developer', 'tester']),
+    body('role').optional().isIn(['admin', 'user']),
   ], validate, createUser);
 
 userRouter.route('/:id')
