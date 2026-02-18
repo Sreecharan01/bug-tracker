@@ -141,8 +141,30 @@ export const DARK_THEME = {
   ...sharedTokens,
 };
 
-// Default to light theme for backward compatibility
-export const THEME = LIGHT_THEME;
+const getInitialMode = () => {
+  if (typeof window === 'undefined') return 'light';
+  const saved = window.localStorage.getItem('bugTrackerTheme');
+  if (saved === 'light' || saved === 'dark') return saved;
+  if (saved === 'auto') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return 'light';
+};
+
+export const resolveThemeByMode = (mode) => {
+  if (mode === 'auto' && typeof window !== 'undefined') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? DARK_THEME : LIGHT_THEME;
+  }
+  return mode === 'dark' ? DARK_THEME : LIGHT_THEME;
+};
+
+// Mutable theme tokens used by existing pages
+export let THEME = getInitialMode() === 'dark' ? DARK_THEME : LIGHT_THEME;
+
+export const setThemeTokens = (mode) => {
+  THEME = resolveThemeByMode(mode);
+  return THEME;
+};
 
 // Pre-built component style objects
 export const componentStyles = {

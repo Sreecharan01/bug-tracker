@@ -140,6 +140,34 @@ export default function BugDetailPage() {
               <p style={{ ...s.desc, color: '#86efac' }}>{bug.resolution}</p>
             </>}
 
+            <h4 style={s.sectionTitle}>Attachments / Screenshots</h4>
+            {bug.attachments?.length ? (
+              <div style={s.attachments}>
+                {bug.attachments.map((file) => {
+                  const isImage = file.mimetype?.startsWith('image/');
+                  return (
+                    <div key={file._id || file.url || file.filename} style={s.attachmentCard}>
+                      {isImage && file.url ? (
+                        <img src={file.url} alt={file.originalName || file.filename || 'attachment'} style={s.attachmentImage} />
+                      ) : (
+                        <div style={s.attachmentPlaceholder}>📎</div>
+                      )}
+                      <div style={s.attachmentMeta}>
+                        <span style={s.attachmentName}>{file.originalName || file.filename || 'Attachment'}</span>
+                        {file.url && (
+                          <a href={file.url} target="_blank" rel="noreferrer" style={s.attachmentLink}>
+                            Open
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={s.desc}>No attachments available.</p>
+            )}
+
             {/* Tags */}
             {bug.tags?.length > 0 && (
               <div style={{ marginTop: 16, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -340,6 +368,13 @@ const s = {
   desc: { margin: 0, color: THEME.colors.gray[700], fontSize: THEME.Typography.fontSize.base, lineHeight: 1.6, whiteSpace: 'pre-wrap' },
   pre: { margin: 0, color: THEME.colors.gray[700], fontSize: THEME.Typography.fontSize.sm, lineHeight: 1.8, whiteSpace: 'pre-wrap', background: THEME.colors.gray[50], borderRadius: THEME.borderRadius.md, padding: THEME.spacing.md },
   twoCol: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: THEME.spacing.lg, marginTop: THEME.spacing.lg },
+  attachments: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: THEME.spacing.md, marginBottom: THEME.spacing.md },
+  attachmentCard: { border: `1px solid ${THEME.colors.gray[200]}`, borderRadius: THEME.borderRadius.md, overflow: 'hidden', background: THEME.colors.white },
+  attachmentImage: { width: '100%', height: 120, objectFit: 'cover', display: 'block' },
+  attachmentPlaceholder: { height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, background: THEME.colors.gray[100] },
+  attachmentMeta: { padding: THEME.spacing.sm, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: THEME.spacing.sm },
+  attachmentName: { fontSize: THEME.Typography.fontSize.xs, color: THEME.colors.gray[700], overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  attachmentLink: { fontSize: THEME.Typography.fontSize.xs, color: THEME.colors.blue[600], textDecoration: 'none' },
   tag: { background: THEME.colors.blue[100], color: THEME.colors.blue[700], fontSize: THEME.Typography.fontSize.xs, padding: `${THEME.spacing.xs}px ${THEME.spacing.sm}px`, borderRadius: THEME.borderRadius.sm },
   commentItem: { background: THEME.colors.gray[50], borderRadius: THEME.borderRadius.md, padding: THEME.spacing.md, border: `1px solid ${THEME.colors.gray[200]}` },
   commentHeader: { display: 'flex', alignItems: 'center', gap: THEME.spacing.md, marginBottom: THEME.spacing.md },

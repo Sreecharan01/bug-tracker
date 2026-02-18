@@ -42,7 +42,7 @@ export default function BugsPage() {
           <h1 style={s.title}>Bug Tracker</h1>
           <p style={s.sub}>{total} total bugs</p>
         </div>
-        <button style={s.newBtn} onClick={() => navigate('/bugs/new')}>+ Report Bug</button>
+        <button style={s.newBtn} onClick={() => navigate('/bugs/create')}>+ Report Bug</button>
       </div>
 
       {/* Filters */}

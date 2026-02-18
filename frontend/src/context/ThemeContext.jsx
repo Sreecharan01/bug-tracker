@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { LIGHT_THEME, DARK_THEME } from '../theme/designSystem';
+import { LIGHT_THEME, DARK_THEME, setThemeTokens } from '../theme/designSystem';
 
 const ThemeContext = createContext(null);
 
@@ -28,6 +28,7 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const activeTheme = getActiveTheme();
     const isDark = activeTheme === DARK_THEME;
+    setThemeTokens(theme);
     
     // Update HTML attribute
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -54,9 +55,12 @@ export const ThemeProvider = ({ children }) => {
 
   const setTheme = useCallback((newTheme) => {
     if (!['light', 'dark', 'auto'].includes(newTheme)) return;
+    if (newTheme === theme) return;
+    setThemeTokens(newTheme);
     setThemeState(newTheme);
     localStorage.setItem('bugTrackerTheme', newTheme);
-  }, []);
+    window.location.reload();
+  }, [theme]);
 
   const value = {
     theme,

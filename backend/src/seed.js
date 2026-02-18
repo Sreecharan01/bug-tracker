@@ -2,6 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User');
 const Bug = require('./models/Bug');
+const Report = require('./models/Report');
 const Settings = require('./models/Settings');
 const connectDB = require('./config/db');
 
@@ -11,7 +12,7 @@ const seedDB = async () => {
   console.log('🌱 Starting database seed...');
 
   // Clear existing data
-  await Promise.all([User.deleteMany({}), Bug.deleteMany({}), Settings.deleteMany({})]);
+  await Promise.all([User.deleteMany({}), Bug.deleteMany({}), Report.deleteMany({}), Settings.deleteMany({})]);
 
   // Create admin
   const admin = await User.create({
@@ -44,7 +45,7 @@ const seedDB = async () => {
   });
 
   // Create sample bugs
-  await Bug.create([
+  const bugSeedData = [
     {
       title: 'Login page crashes on mobile Safari',
       description: 'When a user tries to log in using iPhone Safari, the app crashes immediately.',
@@ -83,65 +84,132 @@ const seedDB = async () => {
       reportedBy: admin._id,
       tags: ['email', 'notifications'],
     },
+    {
+      title: 'Profile image upload fails for large PNG files',
+      description: 'Uploading profile pictures larger than 5MB fails without showing any user-facing error.',
+      status: 'resolved',
+      priority: 'low',
+      severity: 'minor',
+      project: 'User Profile',
+      environment: 'qa',
+      reportedBy: user1._id,
+      assignedTo: admin._id,
+      tags: ['profile', 'upload', 'validation'],
+      resolvedBy: admin._id,
+      resolvedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    },
+    {
+      title: 'Search results ignore status filter after pagination',
+      description: 'When moving to page 2 in bug list, the selected status filter is dropped and mixed records are shown.',
+      status: 'open',
+      priority: 'high',
+      severity: 'major',
+      project: 'Bug List',
+      environment: 'development',
+      reportedBy: user2._id,
+      assignedTo: admin._id,
+      tags: ['search', 'filters', 'pagination'],
+    },
+  ];
+
+  const bugs = [];
+  for (const item of bugSeedData) {
+    const bug = await Bug.create(item);
+    bugs.push(bug);
+  }
+
+  // Create sample reports
+  await Report.create([
+    {
+      title: 'Weekly Bug Summary',
+      type: 'summary',
+      description: 'Overview of open and resolved bugs for this week.',
+      filters: {
+        status: ['open', 'in_progress', 'resolved'],
+        project: ['Web App', 'Dashboard', 'Bug List'],
+      },
+      data: {
+        totalBugs: bugs.length,
+        openBugs: bugs.filter((b) => b.status === 'open').length,
+        resolvedBugs: bugs.filter((b) => b.status === 'resolved').length,
+        closedBugs: bugs.filter((b) => b.status === 'closed').length,
+        criticalBugs: bugs.filter((b) => b.priority === 'critical').length,
+        highBugs: bugs.filter((b) => b.priority === 'high').length,
+        mediumBugs: bugs.filter((b) => b.priority === 'medium').length,
+        lowBugs: bugs.filter((b) => b.priority === 'low').length,
+        avgResolutionTime: 18 * 60 * 60 * 1000,
+        bugsPerProject: {
+          'Web App': bugs.filter((b) => b.project === 'Web App').length,
+          Dashboard: bugs.filter((b) => b.project === 'Dashboard').length,
+          Notifications: bugs.filter((b) => b.project === 'Notifications').length,
+          'User Profile': bugs.filter((b) => b.project === 'User Profile').length,
+          'Bug List': bugs.filter((b) => b.project === 'Bug List').length,
+        },
+        rawBugs: bugs.map((b) => b._id),
+      },
+      generatedBy: admin._id,
+    },
+    {
+      title: 'Assignment Load Report',
+      type: 'assignment',
+      description: 'Bug distribution by assignee.',
+      filters: {
+        assignedTo: [admin._id, user1._id],
+      },
+      data: {
+        totalBugs: bugs.length,
+        openBugs: bugs.filter((b) => b.status === 'open').length,
+        resolvedBugs: bugs.filter((b) => b.status === 'resolved').length,
+        bugsPerAssignee: {
+          'System Admin': bugs.filter((b) => String(b.assignedTo) === String(admin._id)).length,
+          'John Developer': bugs.filter((b) => String(b.assignedTo) === String(user1._id)).length,
+        },
+        rawBugs: bugs.map((b) => b._id),
+      },
+      generatedBy: admin._id,
+    },
+    {
+      title: 'Production Critical Issues',
+      type: 'detailed',
+      description: 'Focused report for critical/high bugs in production.',
+      filters: {
+        environment: ['production'],
+        priority: ['critical', 'high'],
+      },
+      data: {
+        totalBugs: bugs.filter((b) => b.environment === 'production' && ['critical', 'high'].includes(b.priority)).length,
+        openBugs: bugs.filter((b) => b.environment === 'production' && b.status === 'open').length,
+        resolvedBugs: bugs.filter((b) => b.environment === 'production' && b.status === 'resolved').length,
+        criticalBugs: bugs.filter((b) => b.environment === 'production' && b.priority === 'critical').length,
+        highBugs: bugs.filter((b) => b.environment === 'production' && b.priority === 'high').length,
+        rawBugs: bugs
+          .filter((b) => b.environment === 'production' && ['critical', 'high'].includes(b.priority))
+          .map((b) => b._id),
+      },
+      generatedBy: admin._id,
+    },
   ]);
 
   // Create default settings
   await Settings.create([
-    // General Settings
-    { key: 'app_name', category: 'general', value: 'Bug Tracker', label: 'Application Name', description: 'Name of the application', isPublic: true, dataType: 'string', isEditable: true },
-    { key: 'app_version', category: 'general', value: '1.0.0', label: 'Version', description: 'Current application version', isPublic: true, dataType: 'string', isEditable: false },
-    { key: 'max_file_size_mb', category: 'general', value: 10, label: 'Max Upload Size (MB)', description: 'Maximum file size for uploads', isPublic: false, dataType: 'number', isEditable: true },
-    { key: 'allow_registration', category: 'general', value: true, label: 'Allow Public Registration', description: 'Allow new users to register', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'timezone', category: 'general', value: 'UTC', label: 'Default Timezone', description: 'System timezone for timestamps', isPublic: true, dataType: 'string', isEditable: true },
-    { key: 'date_format', category: 'general', value: 'DD/MM/YYYY', label: 'Date Format', description: 'Date display format', isPublic: true, dataType: 'string', isEditable: true },
-    { key: 'time_format', category: 'general', value: '24h', label: 'Time Format', description: '12h or 24h format', isPublic: true, dataType: 'string', isEditable: true },
-    { key: 'theme_mode', category: 'ui', value: 'light', label: 'Default Theme', description: 'light, dark, or auto', isPublic: true, dataType: 'string', isEditable: true },
-    
-    // Notification Settings
-    { key: 'notify_on_assign', category: 'notification', value: true, label: 'Notify on Bug Assignment', description: 'Send notification when bug is assigned', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'notify_on_comment', category: 'notification', value: true, label: 'Notify on Comment', description: 'Send notification when comment is added', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'notify_on_update', category: 'notification', value: true, label: 'Notify on Bug Update', description: 'Send notification when bug is updated', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'notify_on_duplicate', category: 'notification', value: true, label: 'Notify on Duplicate', description: 'Send notification when duplicate bug found', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'notify_on_resolved', category: 'notification', value: true, label: 'Notify on Bug Resolved', description: 'Send notification when bug is resolved', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'notification_digest', category: 'notification', value: 'instant', label: 'Digest Frequency', description: 'instant, daily, weekly', isPublic: true, dataType: 'string', isEditable: true },
-    { key: 'email_notifications_enabled', category: 'notification', value: true, label: 'Email Notifications', description: 'Enable email notifications', isPublic: true, dataType: 'boolean', isEditable: true },
-    
-    // Security Settings
-    { key: 'session_timeout_minutes', category: 'security', value: 480, label: 'Session Timeout (Minutes)', description: 'Auto logout after inactivity', isPublic: false, dataType: 'number', isEditable: true },
-    { key: 'password_expiry_days', category: 'security', value: 90, label: 'Password Expiry (Days)', description: 'Password must be changed after X days (0 = never)', isPublic: false, dataType: 'number', isEditable: true },
-    { key: 'require_password_change', category: 'security', value: false, label: 'Require Password Change', description: 'Force immediate password change on login', isPublic: false, dataType: 'boolean', isEditable: true },
-    { key: 'max_login_attempts', category: 'security', value: 5, label: 'Max Login Attempts', description: 'Lock account after X failed attempts', isPublic: false, dataType: 'number', isEditable: true },
-    { key: 'lockout_duration_minutes', category: 'security', value: 15, label: 'Account Lockout Duration (Min)', description: 'Duration to lock account after failed attempts', isPublic: false, dataType: 'number', isEditable: true },
-    { key: 'enable_two_factor_auth', category: 'security', value: false, label: 'Enable Two-Factor Auth', description: 'Require 2FA for all users', isPublic: false, dataType: 'boolean', isEditable: true },
-    
-    // Project Settings
-    { key: 'default_priority', category: 'project', value: 'medium', label: 'Default Bug Priority', description: 'Default priority for new bugs', isPublic: true, dataType: 'string', isEditable: true },
-    { key: 'default_severity', category: 'project', value: 'major', label: 'Default Bug Severity', description: 'Default severity for new bugs', isPublic: true, dataType: 'string', isEditable: true },
-    { key: 'auto_assign_bugs', category: 'project', value: false, label: 'Auto-Assign Bugs', description: 'Automatically assign bugs based on workload', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'auto_close_days', category: 'project', value: 30, label: 'Auto-Close Days', description: 'Auto-close inactive bugs after X days (0 = disabled)', isPublic: true, dataType: 'number', isEditable: true },
-    { key: 'enable_duplicate_detection', category: 'project', value: true, label: 'Duplicate Detection', description: 'Check for duplicate bug titles', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'require_bug_description', category: 'project', value: true, label: 'Require Bug Description', description: 'Make bug description mandatory', isPublic: true, dataType: 'boolean', isEditable: true },
-    
-    // UI Settings
-    { key: 'items_per_page', category: 'ui', value: 10, label: 'Items Per Page', description: 'Default pagination size', isPublic: true, dataType: 'number', isEditable: true },
-    { key: 'show_closed_bugs', category: 'ui', value: false, label: 'Show Closed Bugs', description: 'Display closed bugs in list by default', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'show_resolved_bugs', category: 'ui', value: true, label: 'Show Resolved Bugs', description: 'Display resolved bugs in list by default', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'compact_view', category: 'ui', value: false, label: 'Compact View', description: 'Use compact display mode', isPublic: true, dataType: 'boolean', isEditable: true },
-    { key: 'enable_animations', category: 'ui', value: true, label: 'Enable Animations', description: 'Enable UI animations and transitions', isPublic: true, dataType: 'boolean', isEditable: true },
-    
-    // Email Settings
-    { key: 'smtp_host', category: 'email', value: 'smtp.example.com', label: 'SMTP Host', description: 'Email server hostname', isPublic: false, dataType: 'string', isEditable: true },
-    { key: 'smtp_port', category: 'email', value: 587, label: 'SMTP Port', description: 'Email server port', isPublic: false, dataType: 'number', isEditable: true },
-    { key: 'smtp_user', category: 'email', value: '', label: 'SMTP Username', description: 'Email account username', isPublic: false, dataType: 'string', isEditable: true },
-    { key: 'smtp_from_email', category: 'email', value: 'noreply@bugtracker.com', label: 'From Email Address', description: 'Sender email address', isPublic: false, dataType: 'string', isEditable: true },
-    { key: 'smtp_reply_to', category: 'email', value: 'support@bugtracker.com', label: 'Reply-To Email', description: 'Reply to email address', isPublic: false, dataType: 'string', isEditable: true },
-    { key: 'email_enabled', category: 'email', value: true, label: 'Email Service Enabled', description: 'Enable email sending', isPublic: false, dataType: 'boolean', isEditable: true },
+    { key: 'app_name', category: 'general', value: 'Bug Tracker', label: 'Application Name', isPublic: true, dataType: 'string' },
+    { key: 'app_version', category: 'general', value: '1.0.0', label: 'Version', isPublic: true, dataType: 'string' },
+    { key: 'max_file_size_mb', category: 'general', value: 10, label: 'Max Upload Size (MB)', isPublic: false, dataType: 'number' },
+    { key: 'session_timeout_minutes', category: 'security', value: 480, label: 'Session Timeout (minutes)', isPublic: false, dataType: 'number', isEditable: true },
+    { key: 'allow_registration', category: 'general', value: true, label: 'Allow Public Registration', isPublic: true, dataType: 'boolean' },
+    { key: 'notify_on_assign', category: 'notification', value: true, label: 'Notify on Bug Assignment', isPublic: true, dataType: 'boolean' },
+    { key: 'notify_on_comment', category: 'notification', value: true, label: 'Notify on Comment', isPublic: true, dataType: 'boolean' },
+    { key: 'default_priority', category: 'project', value: 'medium', label: 'Default Bug Priority', isPublic: true, dataType: 'string' },
+    { key: 'smtp_host', category: 'email', value: 'smtp.example.com', label: 'SMTP Host', isPublic: false, dataType: 'string' },
+    { key: 'smtp_port', category: 'email', value: 587, label: 'SMTP Port', isPublic: false, dataType: 'number' },
   ]);
 
   console.log('\n✅ Seed complete!\n');
   console.log('👤 Admin:     admin@bugtracker.com / Admin@1234');
   console.log('👤 User 1:    john@bugtracker.com  / John@12345');
   console.log('👤 User 2:    sarah@bugtracker.com / Sarah@1234');
+  console.log(`🐛 Bugs seeded: ${bugs.length}`);
+  console.log('📊 Reports seeded: 3');
 
   mongoose.disconnect();
 };

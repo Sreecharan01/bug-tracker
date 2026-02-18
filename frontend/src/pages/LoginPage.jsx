@@ -83,8 +83,8 @@ export default function LoginPage() {
           <div style={s.demoGrid}>
             {[
               { role: 'Admin', email: 'admin@bugtracker.com', pass: 'Admin@1234', color: THEME.colors.error },
-              { role: 'Developer', email: 'dev@bugtracker.com', pass: 'Dev@12345', color: THEME.colors.blue[500] },
-              { role: 'Tester', email: 'tester@bugtracker.com', pass: 'Test@1234', color: THEME.colors.success },
+              { role: 'User 1', email: 'john@bugtracker.com', pass: 'John@12345', color: THEME.colors.blue[500] },
+              { role: 'User 2', email: 'sarah@bugtracker.com', pass: 'Sarah@1234', color: THEME.colors.success },
             ].map((d) => (
               <button key={d.role} style={s.demoBtn} onClick={() => setForm({ email: d.email, password: d.pass })}>
                 <span style={{ ...s.demoBadge, background: d.color }}>{d.role}</span>

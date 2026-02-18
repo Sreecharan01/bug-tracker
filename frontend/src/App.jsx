@@ -1,46 +1,75 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute, AdminRoute, GuestRoute } from './components/common/ProtectedRoute';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import { AdminRoute, ProtectedRoute } from './components/common/ProtectedRoute';
+import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import BugsPage from './pages/BugsPage';
 import BugDetailPage from './pages/BugDetailPage';
 import CreateBugPage from './pages/CreateBugPage';
+import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
-import ProfilePage from './pages/ProfilePage';
-import Layout from './components/layout/Layout';
+import ProjectsPage from './pages/ProjectsPage';
+import MyTasksPage from './pages/MyTasksPage';
 
 function App() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Auth context will handle token validation
+    };
+    checkAuth();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        background: '#f9fafb',
+      }}>
+        <div style={{ textAlign: 'center', color: '#6b7280' }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🐛</div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Guest routes */}
-          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
-          <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected routes inside Layout */}
-          <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="bugs" element={<BugsPage />} />
-            <Route path="bugs/new" element={<CreateBugPage />} />
-            <Route path="bugs/:id" element={<BugDetailPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            {/* Admin-only routes */}
-            <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
-            <Route path="settings" element={<AdminRoute><SettingsPage /></AdminRoute>} />
-          </Route>
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/bugs" element={<BugsPage />} />
+          <Route path="/bugs/:id" element={<BugDetailPage />} />
+          <Route path="/bugs/create" element={<CreateBugPage />} />
+          <Route path="/bugs/new" element={<CreateBugPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/my-tasks" element={<MyTasksPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/users" element={<AdminRoute><UsersPage /></AdminRoute>} />
+        </Route>
 
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+        {/* Redirect */}
+        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+      </Routes>
+    </Router>
   );
 }
 

@@ -15,10 +15,14 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await register(form);
+      const payload = {
+        ...form,
+        role: form.role === 'admin' ? 'admin' : 'user',
+      };
+      await register(payload);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || 'Registration failed. Please check all fields.');
       const fieldErrors = err.response?.data?.errors;
       if (fieldErrors?.length) setError(fieldErrors.map((e) => e.message).join(', '));
     } finally {
@@ -34,7 +38,7 @@ export default function RegisterPage() {
         <div style={s.brand}>
           <span style={s.brandIcon}>🐛</span>
           <h1 style={s.title}>Create Account</h1>
-          <p style={s.sub}>Join BugTracker today</p>
+          <p style={s.sub}>Join BugTracker today (password needs upper, lower, number)</p>
         </div>
 
         {error && <div style={s.alert}>{error}</div>}
