@@ -15,9 +15,74 @@ export default function MyTasksPage() {
   const [projectTasks, setProjectTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState('');
+  const [selectedProjectFiles, setSelectedProjectFiles] = useState({});
+  const [uploadErrors, setUploadErrors] = useState({});
+
+  const getTakenUsers = (project) => {
+    if (Array.isArray(project.takenByUsers)) return project.takenByUsers;
+    if (project.takenBy) {
+      return [{ id: project.takenById || null, username: project.takenBy, takenAt: project.takenAt || null }];
+    }
+    return [];
+  };
+
+  const isTakenByCurrentUser = (project) => {
+    const takenUsers = getTakenUsers(project);
+    return takenUsers.some((member) =>
+      (member.id && currentUserId && member.id === currentUserId) ||
+      (member.username && currentUserName && member.username === currentUserName)
+    );
+  };
+
+  const isCreatorOfProject = (project) => {
+    if (!project) return false;
+    if (project.createdById && currentUserId) return project.createdById === currentUserId;
+    if (project.createdBy && currentUserName) return project.createdBy === currentUserName;
+    return false;
+  };
+
+  const canViewSubmissions = (project) => {
+    return isCreatorOfProject(project) || user?.role === 'admin';
+  };
+
+  const getSubmissions = (project) => {
+    if (Array.isArray(project.submissions)) return project.submissions;
+    return [];
+  };
+
+  const isPastDeadline = (deadline) => {
+    if (!deadline) return false;
+    const due = new Date(deadline);
+    due.setHours(23, 59, 59, 999);
+    return Date.now() > due.getTime();
+  };
+
+  const refreshProjectTasks = (projectsSource) => {
+    const mine = projectsSource.filter((project) => {
+      const createdByMe = (project.createdById && currentUserId && project.createdById === currentUserId) ||
+        (project.createdBy && currentUserName && project.createdBy === currentUserName);
+      const takenByMe = isTakenByCurrentUser(project);
+      return createdByMe || takenByMe;
+    });
+
+    const uniqueMine = mine.filter((project, index, arr) => arr.findIndex((item) => item.id === project.id) === index);
+    setProjectTasks(uniqueMine);
+  };
+
+  const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
+
+    const savedProjects = localStorage.getItem('projects');
+    const allProjects = savedProjects ? JSON.parse(savedProjects) : [];
+    refreshProjectTasks(allProjects);
+
     try {
       if (currentUserId) {
         const { data } = await bugAPI.getAll({ assignedTo: currentUserId, limit: 200, sortBy: 'dueDate', order: 'asc' });
@@ -25,26 +90,9 @@ export default function MyTasksPage() {
       } else {
         setTasks([]);
       }
-
-      const savedProjects = localStorage.getItem('projects');
-      const allProjects = savedProjects ? JSON.parse(savedProjects) : [];
-      const mine = allProjects.filter((project) => {
-        const createdByMe = (project.createdById && currentUserId && project.createdById === currentUserId) ||
-          (project.createdBy && currentUserName && project.createdBy === currentUserName);
-        const takenByUsers = Array.isArray(project.takenByUsers)
-          ? project.takenByUsers
-          : (project.takenBy ? [{ id: project.takenById || null, username: project.takenBy }] : []);
-        const takenByMe = takenByUsers.some((member) =>
-          (member.id && currentUserId && member.id === currentUserId) ||
-          (member.username && currentUserName && member.username === currentUserName)
-        );
-        return createdByMe || takenByMe;
-      });
-
-      const uniqueMine = mine.filter((project, index, arr) => arr.findIndex((item) => item.id === project.id) === index);
-      setProjectTasks(uniqueMine);
     } catch (err) {
       console.error(err);
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -64,6 +112,85 @@ export default function MyTasksPage() {
     } finally {
       setUpdatingId('');
     }
+  };
+
+  const handleCancelTakenProject = (projectId) => {
+    const savedProjects = localStorage.getItem('projects');
+    const allProjects = savedProjects ? JSON.parse(savedProjects) : [];
+
+    const updatedProjects = allProjects.map((project) => {
+      if (project.id !== projectId) return project;
+
+      const takenUsers = getTakenUsers(project);
+      const remainingUsers = takenUsers.filter((member) => !(
+        (member.id && currentUserId && member.id === currentUserId) ||
+        (member.username && currentUserName && member.username === currentUserName)
+      ));
+
+      const nextTakenBy = remainingUsers.length > 0 ? remainingUsers[remainingUsers.length - 1].username : null;
+      const nextTakenById = remainingUsers.length > 0 ? remainingUsers[remainingUsers.length - 1].id || null : null;
+      const nextTakenAt = remainingUsers.length > 0 ? remainingUsers[remainingUsers.length - 1].takenAt || null : null;
+
+      return {
+        ...project,
+        takenByUsers: remainingUsers,
+        takenBy: nextTakenBy,
+        takenById: nextTakenById,
+        takenAt: nextTakenAt,
+        status: remainingUsers.length === 0 && project.status === 'In Progress' ? 'Not Started' : project.status,
+      };
+    });
+
+    localStorage.setItem('projects', JSON.stringify(updatedProjects));
+    refreshProjectTasks(updatedProjects);
+  };
+
+  const handleProjectFileUpload = async (projectId) => {
+    const selectedFile = selectedProjectFiles[projectId];
+    if (!selectedFile) {
+      setUploadErrors((prev) => ({ ...prev, [projectId]: 'Please choose a file first.' }));
+      return;
+    }
+
+    const savedProjects = localStorage.getItem('projects');
+    const allProjects = savedProjects ? JSON.parse(savedProjects) : [];
+    const target = allProjects.find((project) => project.id === projectId);
+
+    if (!target) return;
+    if (isPastDeadline(target.deadline)) {
+      setUploadErrors((prev) => ({ ...prev, [projectId]: 'Deadline passed. File upload is not allowed.' }));
+      return;
+    }
+
+    const fileDataUrl = await readFileAsDataUrl(selectedFile);
+
+    const updatedProjects = allProjects.map((project) => {
+      if (project.id !== projectId) return project;
+
+      const existingSubmissions = Array.isArray(project.submissions) ? project.submissions : [];
+      return {
+        ...project,
+        status: 'Completed',
+        submissions: [
+          ...existingSubmissions,
+          {
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            uploaderId: currentUserId || null,
+            uploader: currentUserName || 'Unknown',
+            fileName: selectedFile.name,
+            fileType: selectedFile.type || 'application/octet-stream',
+            fileSize: selectedFile.size,
+            fileDataUrl,
+            uploadedAt: new Date().toISOString(),
+          },
+        ],
+      };
+    });
+
+    localStorage.setItem('projects', JSON.stringify(updatedProjects));
+    refreshProjectTasks(updatedProjects);
+    setSelectedProjectFiles((prev) => ({ ...prev, [projectId]: null }));
+    setUploadErrors((prev) => ({ ...prev, [projectId]: '' }));
   };
 
   const openCount = tasks.filter((task) => ['open', 'in_progress', 'reopened'].includes(task.status)).length;
@@ -143,6 +270,63 @@ export default function MyTasksPage() {
                       {!Array.isArray(project.takenByUsers) && project.takenBy && <span>Taken by: {project.takenBy}</span>}
                       {project.deadline && <span>Deadline: {new Date(project.deadline).toLocaleDateString()}</span>}
                     </div>
+                    {canViewSubmissions(project) && (
+                      <div style={s.submissionBlock}>
+                        <p style={s.submissionTitle}>Uploaded Files</p>
+                        {getSubmissions(project).length === 0 ? (
+                          <span style={s.submissionEmpty}>No files uploaded yet.</span>
+                        ) : (
+                          getSubmissions(project).map((submission) => (
+                            <div key={submission.id} style={s.submissionItem}>
+                              <a href={submission.fileDataUrl} download={submission.fileName} style={s.submissionLink}>
+                                {submission.fileName}
+                              </a>
+                              <span>by {submission.uploader}</span>
+                              <span>{new Date(submission.uploadedAt).toLocaleString()}</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                    {isTakenByCurrentUser(project) && (
+                      <div style={s.projectActionRow}>
+                        <input
+                          type="file"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            setSelectedProjectFiles((prev) => ({ ...prev, [project.id]: file }));
+                            setUploadErrors((prev) => ({ ...prev, [project.id]: '' }));
+                          }}
+                          style={s.fileInput}
+                          disabled={isPastDeadline(project.deadline)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleProjectFileUpload(project.id)}
+                          style={{
+                            ...s.uploadBtn,
+                            opacity: isPastDeadline(project.deadline) || !selectedProjectFiles[project.id] ? 0.6 : 1,
+                            cursor: isPastDeadline(project.deadline) || !selectedProjectFiles[project.id] ? 'not-allowed' : 'pointer',
+                          }}
+                          disabled={isPastDeadline(project.deadline) || !selectedProjectFiles[project.id]}
+                        >
+                          Upload File
+                        </button>
+                        {isPastDeadline(project.deadline) && (
+                          <span style={s.deadlineWarn}>Deadline passed</span>
+                        )}
+                        {!!uploadErrors[project.id] && (
+                          <span style={s.deadlineWarn}>{uploadErrors[project.id]}</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleCancelTakenProject(project.id)}
+                          style={s.removeBtn}
+                        >
+                          Remove / Cancel Taken
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -188,4 +372,32 @@ const s = {
   projectName: { margin: `0 0 ${THEME.spacing.xs}px 0`, color: THEME.colors.gray[900], fontSize: THEME.Typography.fontSize.base, fontWeight: THEME.Typography.fontWeight.semibold },
   projectDesc: { margin: `0 0 ${THEME.spacing.sm}px 0`, color: THEME.colors.gray[600], fontSize: THEME.Typography.fontSize.sm },
   projectMeta: { display: 'flex', gap: THEME.spacing.md, flexWrap: 'wrap', color: THEME.colors.gray[500], fontSize: THEME.Typography.fontSize.xs },
+  submissionBlock: { marginTop: THEME.spacing.sm, borderTop: `1px solid ${THEME.colors.gray[200]}`, paddingTop: THEME.spacing.sm },
+  submissionTitle: { margin: `0 0 ${THEME.spacing.xs}px 0`, color: THEME.colors.gray[700], fontSize: THEME.Typography.fontSize.sm, fontWeight: THEME.Typography.fontWeight.medium },
+  submissionEmpty: { color: THEME.colors.gray[500], fontSize: THEME.Typography.fontSize.xs },
+  submissionItem: { display: 'flex', gap: THEME.spacing.sm, flexWrap: 'wrap', alignItems: 'center', marginBottom: THEME.spacing.xs, color: THEME.colors.gray[600], fontSize: THEME.Typography.fontSize.xs },
+  submissionLink: { color: THEME.colors.blue[600], textDecoration: 'none', fontWeight: THEME.Typography.fontWeight.medium },
+  projectActionRow: { marginTop: THEME.spacing.sm, display: 'flex', gap: THEME.spacing.sm, flexWrap: 'wrap', alignItems: 'center' },
+  fileInput: { fontSize: THEME.Typography.fontSize.sm },
+  uploadBtn: {
+    background: THEME.colors.blue[500],
+    color: THEME.colors.white,
+    border: 'none',
+    borderRadius: THEME.borderRadius.md,
+    padding: `${THEME.spacing.xs}px ${THEME.spacing.md}px`,
+    cursor: 'pointer',
+    fontSize: THEME.Typography.fontSize.sm,
+    fontWeight: THEME.Typography.fontWeight.medium,
+  },
+  deadlineWarn: { color: THEME.colors.error, fontSize: THEME.Typography.fontSize.xs, fontWeight: THEME.Typography.fontWeight.medium },
+  removeBtn: {
+    background: THEME.colors.white,
+    color: THEME.colors.error,
+    border: `1px solid ${THEME.colors.error}`,
+    borderRadius: THEME.borderRadius.md,
+    padding: `${THEME.spacing.xs}px ${THEME.spacing.md}px`,
+    cursor: 'pointer',
+    fontSize: THEME.Typography.fontSize.sm,
+    fontWeight: THEME.Typography.fontWeight.medium,
+  },
 };

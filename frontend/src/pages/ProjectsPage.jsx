@@ -54,6 +54,11 @@ export default function ProjectsPage() {
     );
   };
 
+  const getSubmissions = (project) => {
+    if (Array.isArray(project.submissions)) return project.submissions;
+    return [];
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -130,19 +135,24 @@ export default function ProjectsPage() {
     localStorage.setItem('projects', JSON.stringify(updatedProjects));
   };
 
+  const isCreatorOfProject = (project) => {
+    if (!project) return false;
+    if (project.createdById && currentUserId) return project.createdById === currentUserId;
+    if (project.createdBy && currentUserName) return project.createdBy === currentUserName;
+    return false;
+  };
+
   const filteredProjects = projects.filter((project) => {
     const takenUsers = getTakenUsers(project);
+    if (hasCurrentUserTaken(project) && !isCreatorOfProject(project)) return false;
     if (filterStatus === 'all') return true;
     if (filterStatus === 'open') return takenUsers.length === 0;
     if (filterStatus === 'taken') return takenUsers.length > 0;
     return true;
   });
 
-  const isCreatorOfProject = (project) => {
-    if (!project) return false;
-    if (project.createdById && currentUserId) return project.createdById === currentUserId;
-    if (project.createdBy && currentUserName) return project.createdBy === currentUserName;
-    return false;
+  const canViewSubmissions = (project) => {
+    return isCreatorOfProject(project) || user?.role === 'admin';
   };
 
   const styles = {
@@ -292,6 +302,36 @@ export default function ProjectsPage() {
       color: THEME.colors.gray[500],
       fontSize: THEME.Typography.fontSize.base,
     },
+    submissionBlock: {
+      borderTop: `1px solid ${THEME.colors.gray[200]}`,
+      paddingTop: THEME.spacing.sm,
+      marginTop: THEME.spacing.sm,
+      marginBottom: THEME.spacing.sm,
+    },
+    submissionTitle: {
+      margin: `0 0 ${THEME.spacing.xs}px 0`,
+      color: THEME.colors.gray[700],
+      fontSize: THEME.Typography.fontSize.sm,
+      fontWeight: THEME.Typography.fontWeight.medium,
+    },
+    submissionItem: {
+      display: 'flex',
+      gap: THEME.spacing.sm,
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      fontSize: THEME.Typography.fontSize.xs,
+      color: THEME.colors.gray[600],
+      marginBottom: THEME.spacing.xs,
+    },
+    submissionLink: {
+      color: THEME.colors.blue[600],
+      textDecoration: 'none',
+      fontWeight: THEME.Typography.fontWeight.medium,
+    },
+    noSubmission: {
+      color: THEME.colors.gray[500],
+      fontSize: THEME.Typography.fontSize.xs,
+    },
   };
 
   return (
@@ -419,6 +459,7 @@ export default function ProjectsPage() {
           filteredProjects.map(project => {
             const takenUsers = getTakenUsers(project);
             const currentUserTaken = hasCurrentUserTaken(project);
+            const submissions = getSubmissions(project);
 
             return (
             <div
@@ -435,6 +476,28 @@ export default function ProjectsPage() {
                   <span>Taken by: {takenUsers.map((member) => member.username).join(', ')}</span>
                 )}
               </div>
+              {canViewSubmissions(project) && (
+                <div style={styles.submissionBlock}>
+                  <p style={styles.submissionTitle}>Uploaded Files</p>
+                  {submissions.length === 0 ? (
+                    <span style={styles.noSubmission}>No files uploaded yet.</span>
+                  ) : (
+                    submissions.map((submission) => (
+                      <div key={submission.id} style={styles.submissionItem}>
+                        <a
+                          href={submission.fileDataUrl}
+                          download={submission.fileName}
+                          style={styles.submissionLink}
+                        >
+                          {submission.fileName}
+                        </a>
+                        <span>by {submission.uploader}</span>
+                        <span>{new Date(submission.uploadedAt).toLocaleString()}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
               <div style={styles.rowActions}>
                 <div>
                   <button
