@@ -30,7 +30,7 @@ export const ThemeProvider = ({ children }) => {
     const isDark = activeTheme === DARK_THEME;
     setThemeTokens(theme);
     
-    // Update HTML attribute
+    // Update the HTML data-theme attribute
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     
     // Update CSS variables (optional, for global theme colors)
