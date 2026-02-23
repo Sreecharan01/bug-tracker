@@ -39,7 +39,7 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty('--theme-bg', activeTheme.colors.background?.primary || '#FFFFFF');
   }, [theme, getActiveTheme]);
 
-  // Listen to system theme changes when in auto mode
+  // Listen for system theme changes when auto mode is active
   useEffect(() => {
     if (theme !== 'auto') return;
 
