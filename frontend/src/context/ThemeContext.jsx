@@ -24,7 +24,7 @@ export const ThemeProvider = ({ children }) => {
     return theme === 'dark' ? DARK_THEME : LIGHT_THEME;
   }, [theme]);
 
-  // Apply theme to DOM
+  // Apply active theme values to DOM
   useEffect(() => {
     const activeTheme = getActiveTheme();
     const isDark = activeTheme === DARK_THEME;
