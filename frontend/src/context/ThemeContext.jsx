@@ -14,7 +14,7 @@ export const ThemeProvider = ({ children }) => {
     return 'auto';
   });
 
-  // Resolve active theme object from current mode
+  // Get the actual theme object based on current mode
   const getActiveTheme = useCallback(() => {
     if (theme === 'auto') {
       // Check system preference
@@ -24,7 +24,7 @@ export const ThemeProvider = ({ children }) => {
     return theme === 'dark' ? DARK_THEME : LIGHT_THEME;
   }, [theme]);
 
-  // Apply active theme values to DOM
+  // Apply theme to DOM
   useEffect(() => {
     const activeTheme = getActiveTheme();
     const isDark = activeTheme === DARK_THEME;
