@@ -14,7 +14,7 @@ export const ThemeProvider = ({ children }) => {
     return 'auto';
   });
 
-  // Get the actual theme object based on current mode
+  // Resolve the active theme object from the current mode
   const getActiveTheme = useCallback(() => {
     if (theme === 'auto') {
       // Check system preference
