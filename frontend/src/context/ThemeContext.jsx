@@ -33,7 +33,7 @@ export const ThemeProvider = ({ children }) => {
     // Update the HTML data-theme attribute
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     
-    // Update CSS variables (optional, for global theme colors)
+    // Update CSS variables for global theme colors
     const root = document.documentElement;
     root.style.setProperty('--theme-primary', activeTheme.colors.blue?.[500] || '#3B82F6');
     root.style.setProperty('--theme-bg', activeTheme.colors.background?.primary || '#FFFFFF');
