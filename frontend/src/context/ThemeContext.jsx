@@ -10,7 +10,7 @@ export const ThemeProvider = ({ children }) => {
     if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'auto') {
       return savedTheme;
     }
-    // 2. Default to auto
+    // 2. Fall back to auto mode
     return 'auto';
   });
 
