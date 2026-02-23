@@ -5,7 +5,7 @@ const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setThemeState] = useState(() => {
-    // 1. Check localStorage
+    // 1. Check local storage
     const savedTheme = localStorage.getItem('bugTrackerTheme');
     if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'auto') {
       return savedTheme;
