@@ -1,12 +1,13 @@
 {
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "version": 2,
+  "buildCommand": "npm run build --prefix frontend",
   "outputDirectory": "frontend/build",
-  "installCommand": "cd frontend && npm install",
+  "installCommand": "npm install --prefix backend && npm install --prefix frontend",
   "framework": null,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://your-backend-url.com/api/$1"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }
