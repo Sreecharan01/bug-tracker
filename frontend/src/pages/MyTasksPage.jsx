@@ -69,17 +69,25 @@ export default function MyTasksPage() {
     return Date.now() > due.getTime();
   };
 
-  const refreshProjectTasks = (projectsSource) => {
+  const refreshProjectTasks = useCallback((projectsSource) => {
     const mine = projectsSource.filter((project) => {
       const createdByMe = (project.createdById && currentUserId && project.createdById === currentUserId) ||
         (project.createdBy && currentUserName && project.createdBy === currentUserName);
-      const takenByMe = isTakenByCurrentUser(project);
+      const takenUsers = Array.isArray(project.takenByUsers)
+        ? project.takenByUsers
+        : project.takenBy
+          ? [{ id: project.takenById || null, username: project.takenBy, takenAt: project.takenAt || null }]
+          : [];
+      const takenByMe = takenUsers.some((member) =>
+        (member.id && currentUserId && member.id === currentUserId) ||
+        (member.username && currentUserName && member.username === currentUserName)
+      );
       return createdByMe || takenByMe;
     });
 
     const uniqueMine = mine.filter((project, index, arr) => arr.findIndex((item) => item.id === project.id) === index);
     setProjectTasks(uniqueMine);
-  };
+  }, [currentUserId, currentUserName]);
 
   const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -108,7 +116,7 @@ export default function MyTasksPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentUserId, currentUserName]);
+  }, [currentUserId, refreshProjectTasks]);
 
   useEffect(() => {
     fetchTasks();

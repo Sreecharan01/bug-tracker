@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { userAPI } from '../services/api';
 import { THEME } from '../theme/designSystem';
 
@@ -14,7 +14,7 @@ export default function UsersPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const params = { page, limit: 10, ...(search && { search }), ...(roleFilter && { role: roleFilter }) };
@@ -23,9 +23,9 @@ export default function UsersPage() {
       setTotal(data.meta?.pagination?.total || 0);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
-  };
+  }, [page, search, roleFilter]);
 
-  useEffect(() => { fetchUsers(); }, [page, search, roleFilter]);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handleToggle = async (id) => {
     await userAPI.toggleStatus(id);
