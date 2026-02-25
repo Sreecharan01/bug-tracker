@@ -4,7 +4,7 @@ import { authAPI } from '../services/api';
 import { THEME } from '../theme/designSystem';
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const [form, setForm] = useState({ name: user?.name || '', department: user?.department || '' });
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [saving, setSaving] = useState(false);
@@ -33,19 +33,41 @@ export default function ProfilePage() {
 
   const handlePwChange = async (e) => {
     e.preventDefault();
+    setPwMsg('');
+    setPwError('');
+
+    if (pwForm.newPassword.length < 8) {
+      setPwError('New password must be at least 8 characters');
+      return;
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(pwForm.newPassword)) {
+      setPwError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+      return;
+    }
+
     if (pwForm.newPassword !== pwForm.confirmPassword) {
       setPwError('New passwords do not match');
       return;
     }
+
+    if (pwForm.currentPassword === pwForm.newPassword) {
+      setPwError('New password must be different from current password');
+      return;
+    }
+
     setChangingPw(true);
-    setPwMsg('');
-    setPwError('');
     try {
       await authAPI.changePassword({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
-      setPwMsg('Password changed. You will be logged out.');
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      await logout();
     } catch (err) {
-      setPwError(err.response?.data?.message || 'Password change failed');
+      const backendErrors = err.response?.data?.errors;
+      if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+        setPwError(backendErrors[0].message || err.response?.data?.message || 'Password change failed');
+      } else {
+        setPwError(err.response?.data?.message || 'Password change failed');
+      }
     } finally { setChangingPw(false); }
   };
 

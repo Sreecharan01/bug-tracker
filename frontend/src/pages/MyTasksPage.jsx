@@ -18,6 +18,18 @@ export default function MyTasksPage() {
   const [selectedProjectFiles, setSelectedProjectFiles] = useState({});
   const [uploadErrors, setUploadErrors] = useState({});
 
+  const saveProjectsToStorage = (nextProjects) => {
+    try {
+      localStorage.setItem('projects', JSON.stringify(nextProjects));
+      return { ok: true };
+    } catch (error) {
+      if (error?.name === 'QuotaExceededError') {
+        return { ok: false, quota: true };
+      }
+      throw error;
+    }
+  };
+
   const getTakenUsers = (project) => {
     if (Array.isArray(project.takenByUsers)) return project.takenByUsers;
     if (project.takenBy) {
@@ -141,7 +153,7 @@ export default function MyTasksPage() {
       };
     });
 
-    localStorage.setItem('projects', JSON.stringify(updatedProjects));
+    saveProjectsToStorage(updatedProjects);
     refreshProjectTasks(updatedProjects);
   };
 
@@ -164,6 +176,17 @@ export default function MyTasksPage() {
 
     const fileDataUrl = await readFileAsDataUrl(selectedFile);
 
+    const createSubmission = (includeFileData) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      uploaderId: currentUserId || null,
+      uploader: currentUserName || 'Unknown',
+      fileName: selectedFile.name,
+      fileType: selectedFile.type || 'application/octet-stream',
+      fileSize: selectedFile.size,
+      ...(includeFileData ? { fileDataUrl } : {}),
+      uploadedAt: new Date().toISOString(),
+    });
+
     const updatedProjects = allProjects.map((project) => {
       if (project.id !== projectId) return project;
 
@@ -173,21 +196,46 @@ export default function MyTasksPage() {
         status: 'Completed',
         submissions: [
           ...existingSubmissions,
-          {
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            uploaderId: currentUserId || null,
-            uploader: currentUserName || 'Unknown',
-            fileName: selectedFile.name,
-            fileType: selectedFile.type || 'application/octet-stream',
-            fileSize: selectedFile.size,
-            fileDataUrl,
-            uploadedAt: new Date().toISOString(),
-          },
+          createSubmission(true),
         ],
       };
     });
 
-    localStorage.setItem('projects', JSON.stringify(updatedProjects));
+    const writeResult = saveProjectsToStorage(updatedProjects);
+
+    if (!writeResult.ok && writeResult.quota) {
+      const metadataOnlyProjects = allProjects.map((project) => {
+        if (project.id !== projectId) return project;
+
+        const existingSubmissions = Array.isArray(project.submissions) ? project.submissions : [];
+        return {
+          ...project,
+          status: 'Completed',
+          submissions: [
+            ...existingSubmissions,
+            createSubmission(false),
+          ],
+        };
+      });
+
+      const metadataWriteResult = saveProjectsToStorage(metadataOnlyProjects);
+      if (!metadataWriteResult.ok) {
+        setUploadErrors((prev) => ({
+          ...prev,
+          [projectId]: 'Storage full. Remove old uploaded files and try again.',
+        }));
+        return;
+      }
+
+      refreshProjectTasks(metadataOnlyProjects);
+      setSelectedProjectFiles((prev) => ({ ...prev, [projectId]: null }));
+      setUploadErrors((prev) => ({
+        ...prev,
+        [projectId]: 'File metadata saved, but file content was too large for browser storage.',
+      }));
+      return;
+    }
+
     refreshProjectTasks(updatedProjects);
     setSelectedProjectFiles((prev) => ({ ...prev, [projectId]: null }));
     setUploadErrors((prev) => ({ ...prev, [projectId]: '' }));
@@ -278,9 +326,13 @@ export default function MyTasksPage() {
                         ) : (
                           getSubmissions(project).map((submission) => (
                             <div key={submission.id} style={s.submissionItem}>
-                              <a href={submission.fileDataUrl} download={submission.fileName} style={s.submissionLink}>
-                                {submission.fileName}
-                              </a>
+                              {submission.fileDataUrl ? (
+                                <a href={submission.fileDataUrl} download={submission.fileName} style={s.submissionLink}>
+                                  {submission.fileName}
+                                </a>
+                              ) : (
+                                <span>{submission.fileName} (metadata only)</span>
+                              )}
                               <span>by {submission.uploader}</span>
                               <span>{new Date(submission.uploadedAt).toLocaleString()}</span>
                             </div>
