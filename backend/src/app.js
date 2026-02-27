@@ -17,10 +17,21 @@ connectDB();
 const app = express();
 app.set('trust proxy', 'loopback');
 
-const configuredOrigins = (process.env.CLIENT_URL || '')
+const envOrigins = [process.env.CLIENT_URL, process.env.FRONTEND_URL, process.env.CORS_ORIGIN]
+  .filter(Boolean)
+  .join(',')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+
+const defaultLocalOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+const configuredOrigins = Array.from(new Set([...defaultLocalOrigins, ...envOrigins]));
 
 const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
 if (vercelUrl && !configuredOrigins.includes(vercelUrl)) {
@@ -33,7 +44,7 @@ const isAllowedOrigin = (origin) => {
 
   try {
     const { hostname } = new URL(origin);
-    return hostname.endsWith('.vercel.app');
+    return hostname.endsWith('.vercel.app') || hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.');
   } catch {
     return false;
   }
